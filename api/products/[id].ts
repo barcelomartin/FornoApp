@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { query } from "../_db";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   const { id } = req.query as { id: string };
   if (!id) return res.status(400).json({ error: "id requerido" });
 
