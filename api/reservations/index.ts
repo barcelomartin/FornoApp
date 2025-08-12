@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { tx } from "../_db";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method === "GET") {
     const out = await tx(async q => {
       const r = await q(`SELECT id, client_name, phone, status, created_at FROM reservations ORDER BY created_at DESC LIMIT 100`);
