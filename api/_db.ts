@@ -1,34 +1,25 @@
 import { Pool } from "pg";
 
-// Usa DATABASE_URL desde las variables de entorno de Vercel
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 5,
-  idleTimeoutMillis: 10_000
-});
-
-export async function query<T = any>(text: string, params?: any[]) {
-  const client = await pool.connect();
-  try {
-    const res = await client.query<T>(text, params);
-    return res;
-  } finally {
-    client.release();
-  }
+const connStr = process.env.DATABASE_URL;
+if (!connStr) {
+  // Para ver el fallo claro en logs
+  throw new Error("Missing env: DATABASE_URL");
 }
 
-export async function tx<T>(fn: (q: (sql: string, p?: any[]) => Promise<any>) => Promise<T>) {
-  const client = await pool.connect();
+export const pool = new Pool({
+  connectionString: connStr,
+  // Fuerza SSL para Neon en Vercel
+  ssl: { rejectUnauthorized: false },
+  max: 5,
+  idleTimeoutMillis: 10_000,
+});
+
+export async function query(text: string, params?: any[]) {
+  const c = await pool.connect();
   try {
-    await client.query('BEGIN');
-    const runner = (sql: string, p?: any[]) => client.query(sql, p);
-    const out = await fn(runner);
-    await client.query('COMMIT');
-    return out;
-  } catch (e) {
-    try { await client.query('ROLLBACK'); } catch {}
-    throw e;
+    const res = await c.query(text, params);
+    return res;
   } finally {
-    client.release();
+    c.release();
   }
 }
