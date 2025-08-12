@@ -1,4 +1,4 @@
-import { query } from "../_db";
+import { query } from "../_db.js";
 
 export default async function handler(req: any, res: any) {
   const { id } = req.query as { id: string };
