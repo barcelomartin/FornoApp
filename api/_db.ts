@@ -20,11 +20,12 @@ export async function query(text: string, params?: any[]) {
   }
 }
 
-export async function tx<T = any>(fn: (q: any) => Promise<T>) {
+/** Transacciones simples */
+export async function tx<T = any>(fn: (q: (sql: string, p?: any[]) => Promise<any>) => Promise<T>) {
   const c = await pool.connect();
   try {
     await c.query("BEGIN");
-    const q = (sql: string, params?: any[]) => c.query(sql, params);
+    const q = (sql: string, p?: any[]) => c.query(sql, p);
     const out = await fn(q);
     await c.query("COMMIT");
     return out;
