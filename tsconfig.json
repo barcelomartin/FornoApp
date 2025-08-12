@@ -2,11 +2,14 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
-    "moduleResolution": "Bundler",
-    "outDir": "dist",
+    "moduleResolution": "node",
+    "moduleDetection": "force",
+    "isolatedModules": true,
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
   },
   "include": ["api/**/*.ts"]
 }
