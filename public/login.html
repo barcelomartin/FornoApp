@@ -1,33 +1,171 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Forno</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forno · Acceso</title>
+
+  <!-- Fuente bonita -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#faf7f2;
+      --bg2:#f1e6d7;
+      --card:#ffffff;
+      --accent:#e55039;
+      --accent-dark:#c24331;
+      --text:#2b2b2b;
+      --muted:#707070;
+      --success:#1aa160;
+      --error:#c9372c;
+      --ring: 0 10px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% -10%, var(--bg2), transparent 60%),
+        radial-gradient(1400px 800px at 120% 110%, var(--bg2), transparent 55%),
+        var(--bg1);
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+    .card{
+      width:100%;
+      max-width:420px;
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:var(--ring);
+      padding:28px;
+      transition:.2s transform ease;
+    }
+    .card:hover{ transform:translateY(-2px); }
+    .logo-wrap{
+      display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:12px;
+    }
+    .logo{
+      width:72px; height:72px; border-radius:50%; object-fit:cover;
+      border:4px solid #eee; background:#fff;
+      box-shadow:0 8px 30px rgba(0,0,0,.06);
+    }
+    h1{
+      font-size:24px; margin:6px 0 2px; text-align:center; letter-spacing:.4px;
+    }
+    p.sub{
+      margin:0 0 18px; text-align:center; color:var(--muted); font-size:14px;
+    }
+    form{ display:grid; gap:14px; }
+    label{ font-size:13px; color:var(--muted); }
+    input{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #e5e5e5;
+      outline:none; transition:border .2s, box-shadow .2s; font-size:14px; background:#fff;
+    }
+    input:focus{
+      border-color:#e1b89a;
+      box-shadow:0 0 0 4px rgba(229,80,57,.08);
+    }
+    button{
+      margin-top:6px;
+      width:100%; padding:12px 16px; border:0; border-radius:12px;
+      background:linear-gradient(135deg, var(--accent), #f37d62);
+      color:white; font-weight:600; font-size:15px; cursor:pointer;
+      box-shadow:0 10px 25px rgba(229,80,57,.25);
+      transition:transform .08s ease, filter .2s ease;
+    }
+    button:active{ transform:translateY(1px) }
+    button:disabled{ filter:grayscale(.4); opacity:.7; cursor:not-allowed }
+
+    .msg{ margin-top:10px; font-size:13px; }
+    .msg.ok{ color:var(--success) }
+    .msg.err{ color:var(--error) }
+
+    .links{
+      margin-top:14px; text-align:center; font-size:13px; color:var(--muted);
+    }
+    .links a{ color:var(--accent); text-decoration:none; font-weight:600 }
+    .links a:hover{ text-decoration:underline }
+    .debug{
+      margin-top:8px; white-space:pre-wrap; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size:12px; color:#4b5563; background:#fafafa; border:1px solid #eee; padding:10px; border-radius:10px;
+      display:none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Login de Usuario</h1>
-  <form id="loginForm">
-    <label>Usuario: <input type="text" id="username" required></label><br>
-    <label>Contraseña: <input type="password" id="password" required></label><br>
-    <button type="submit">Entrar</button>
-  </form>
-  <div id="result"></div>
+  <main class="card" role="main" aria-labelledby="title">
+    <div class="logo-wrap">
+      <!-- coloca tu logo en /public/logo.png -->
+      <img class="logo" src="/logo.png" alt="Forma Bakery logo" />
+    </div>
+    <h1 id="title">Acceso a Forno</h1>
+    <p class="sub">Introduce tus credenciales para entrar</p>
+
+    <form id="loginForm" novalidate>
+      <div>
+        <label for="username">Usuario</label>
+        <input id="username" name="username" autocomplete="username" required />
+      </div>
+      <div>
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+      </div>
+      <button id="submitBtn" type="submit">Entrar</button>
+      <div id="msg" class="msg" aria-live="polite"></div>
+      <pre id="debug" class="debug"></pre>
+    </form>
+
+    <div class="links">
+      <a href="/">Volver al inicio</a> · <a href="/api/health" target="_blank">/api/health</a>
+    </div>
+  </main>
+
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    const form = document.getElementById('loginForm');
+    const btn  = document.getElementById('submitBtn');
+    const msg  = document.getElementById('msg');
+    const dbg  = document.getElementById('debug');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+      msg.textContent = '';
+      msg.className = 'msg';
+      dbg.style.display = 'none';
+      btn.disabled = true;
+
+      const username = (document.getElementById('username') as HTMLInputElement).value.trim();
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+
       try {
         const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
+
         const data = await res.json();
-        document.getElementById('result').textContent = JSON.stringify(data);
+        if (res.ok) {
+          msg.textContent = '✅ Login exitoso';
+          msg.classList.add('ok');
+          // ejemplo: redirigir a un dashboard más adelante
+          // location.href = '/dashboard.html';
+        } else {
+          msg.textContent = data?.error || 'Credenciales inválidas';
+          msg.classList.add('err');
+        }
+        // muestra respuesta en un cuadro “debug”
+        dbg.textContent = JSON.stringify(data, null, 2);
+        dbg.style.display = 'block';
       } catch (err) {
-        document.getElementById('result').textContent = 'Error de conexión';
+        msg.textContent = 'Error de conexión';
+        msg.classList.add('err');
+      } finally {
+        btn.disabled = false;
       }
     });
   </script>
