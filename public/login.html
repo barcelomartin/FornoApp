@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Forno</title>
+</head>
+<body>
+  <h1>Login de Usuario</h1>
+  <form id="loginForm">
+    <label>Usuario: <input type="text" id="username" required></label><br>
+    <label>Contraseña: <input type="password" id="password" required></label><br>
+    <button type="submit">Entrar</button>
+  </form>
+  <div id="result"></div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        document.getElementById('result').textContent = JSON.stringify(data);
+      } catch (err) {
+        document.getElementById('result').textContent = 'Error de conexión';
+      }
+    });
+  </script>
+</body>
+</html>
