@@ -150,10 +150,8 @@
 
         const data = await res.json();
         if (res.ok) {
-          msg.textContent = '✅ Login exitoso';
-          msg.classList.add('ok');
-          // ejemplo: redirigir a un dashboard más adelante
-          // location.href = '/dashboard.html';
+          localStorage.setItem('forno_user', JSON.stringify(data.user)); // guarda sesión
+          location.href = '/dashboard.html';                             // entra al dashboard
         } else {
           msg.textContent = data?.error || 'Credenciales inválidas';
           msg.classList.add('err');
