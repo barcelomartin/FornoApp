@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { query } from "../_db";
 
 export default async function handler(req: any, res: any) {
