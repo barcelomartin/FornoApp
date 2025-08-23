@@ -31,46 +31,7 @@ function show(panel) {
 window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
 show(location.hash.slice(1) || 'home'); // por defecto: Dashboard
 
-// helpers
-function renderUsers(users){
-  const tb = document.querySelector('#tblUsers tbody');
-  tb.innerHTML = '';
-
-  const roleName = (r) => r === 1 ? 'Administrador' : 'Usuario';
-  const roleClass = (r) => r === 1 ? 'admin' : 'user';
-
-  users.forEach(u=>{
-    const tr = document.createElement('tr');
-
-    // Columna Usuario: avatar + nombre (SIN id)
-    const tdUser = document.createElement('td');
-    tdUser.innerHTML = `
-      <div class="user-cell">
-        <svg class="avatar ${roleClass(u.role)}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/>
-        </svg>
-        <span class="name">${u.name}</span>
-      </div>`;
-    tr.appendChild(tdUser);
-
-    // Columna Role: texto bonito
-    const tdRole = document.createElement('td');
-    tdRole.innerHTML = `<span class="role-badge">${roleName(u.role)}</span>`;
-    tr.appendChild(tdRole);
-
-    // Columna Acciones: Editar
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => dash.u_edit(u);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-
-    tb.appendChild(tr);
-  });
-}
-
+// ------------- helpers -------------
 async function api(path, opts){
   const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
   const data = await r.json().catch(()=> ({}));
@@ -101,7 +62,48 @@ const fillSelect = (selId, rows, value='id', label='name')=>{
   rows.forEach(r=>{ const o=document.createElement('option'); o.value=r[value]; o.textContent=r[label]; s.appendChild(o); });
 };
 
-// -------- Carga inicial (lo que ya tenías) ----------
+// -------- Usuarios: render especial (avatar pequeño + role bonito, SIN id) ----------
+function renderUsers(users){
+  const tb = document.querySelector('#tblUsers tbody');
+  tb.innerHTML = '';
+
+  users.forEach(u=>{
+    const role = Number(u.role); // asegura 1/2
+    const roleName  = role === 1 ? 'Administrador' : 'Usuario';
+    const roleClass = role === 1 ? 'admin' : 'user';
+
+    const tr = document.createElement('tr');
+
+    // Usuario (avatar pequeño + nombre en la misma celda)
+    const tdUser = document.createElement('td');
+    tdUser.innerHTML = `
+      <div class="user-cell">
+        <svg class="avatar ${roleClass}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/>
+        </svg>
+        <span class="name">${u.name}</span>
+      </div>`;
+    tr.appendChild(tdUser);
+
+    // Role
+    const tdRole = document.createElement('td');
+    tdRole.innerHTML = `<span class="role-badge">${roleName}</span>`;
+    tr.appendChild(tdRole);
+
+    // Acciones
+    const tdAct = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Editar';
+    btn.onclick = () => dash.u_edit(u);
+    tdAct.appendChild(btn);
+    tr.appendChild(tdAct);
+
+    tb.appendChild(tr);
+  });
+}
+
+// -------- Carga inicial ----------
 async function loadAll(){
   const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
     api('/api/users').catch(()=>[]),
@@ -111,10 +113,9 @@ async function loadAll(){
     api('/api/campaign_products').catch(()=>[]),
     api('/api/reservations').catch(()=>[])
   ]);
-  // Usuarios grid
+
   renderUsers(users);
 
-  // Resto como antes (si existen esos elementos)
   const typesFmt = types.map(t=>({id:t.id, product:t.product_id, type:t.name}));
   fillTable('tblProducts', products, ['id','name']);
   fillTable('tblTypes', typesFmt, ['id','product','type']);
@@ -154,10 +155,8 @@ uSaveBtn?.addEventListener('click', async () => {
   if (!name) return alert('Nombre requerido');
 
   if (!id) {
-    // create
     await api('/api/users', { method:'POST', body:JSON.stringify({ name, password:pass || '1234', role }) });
   } else {
-    // update (pass opcional)
     const payload = { id, name, role };
     if (pass) payload.password = pass;
     await api('/api/users', { method:'PUT', body:JSON.stringify(payload) });
@@ -169,7 +168,7 @@ uSaveBtn?.addEventListener('click', async () => {
 export const dash = {
   u_edit(user){ u_fillForm(user); u_showForm(true); },
 
-  // — (opcional) deja tus funciones previas aquí si ya las usas —
+  // Resto (productos/campañas/reservas) igual que tenías:
   async addProduct(){
     const name = $('#p_name')?.value?.trim(); if(!name) return;
     await api('/api/products', { method:'POST', body:JSON.stringify({ name }) });
