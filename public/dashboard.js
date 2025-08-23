@@ -32,6 +32,71 @@ window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
 show(location.hash.slice(1) || 'home'); // por defecto: Dashboard
 
 // ------------- helpers -------------
+// ===== Estado para productos/tipos =====
+const state = {
+  products: [],
+  types: [],
+  selectedProductId: null
+};
+
+// Render productos (solo nombre + Editar)
+function renderProductsOnly(products){
+  state.products = products || [];
+  const tb = document.querySelector('#tblProductsOnly tbody');
+  tb.innerHTML = '';
+  state.products.forEach(p=>{
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td');
+    tdName.textContent = p.name;
+    tr.appendChild(tdName);
+
+    const tdAct = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Editar';
+    btn.onclick = () => p_edit(p);
+    tdAct.appendChild(btn);
+    tr.appendChild(tdAct);
+
+    tb.appendChild(tr);
+  });
+}
+
+// Render tipos del producto seleccionado
+function renderTypesFor(productId){
+  const product = state.products.find(p=>p.id===productId);
+  const tb = document.querySelector('#tblTypesFor tbody');
+  const title = document.getElementById('pt_title');
+  const ptNewBtn = document.getElementById('pt_newBtn');
+
+  tb.innerHTML = '';
+  if (!product) {
+    title.textContent = 'Selecciona un producto para gestionar sus tipos.';
+    ptNewBtn.disabled = true;
+    return;
+  }
+  title.textContent = `Tipos de: ${product.name}`;
+  ptNewBtn.disabled = false;
+
+  const list = state.types.filter(t=>t.product_id === productId);
+  list.forEach(t=>{
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td');
+    tdName.textContent = t.name;
+    tr.appendChild(tdName);
+
+    const tdAct = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Editar';
+    btn.onclick = () => pt_edit(t);
+    tdAct.appendChild(btn);
+    tr.appendChild(tdAct);
+
+    tb.appendChild(tr);
+  });
+}
+
 async function api(path, opts){
   const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
   const data = await r.json().catch(()=> ({}));
