@@ -220,23 +220,67 @@
     <!-- PRODUCTOS & TIPOS -->
     <section id="panel-productos" class="panel">
       <h2>Productos & Tipos</h2>
+    
       <div class="grid two">
+        <!-- Columna izquierda: Formularios -->
         <div>
-          <div class="row">
-            <div style="flex:1"><label>Producto<input id="p_name"></label></div>
-            <button class="btn" onclick="dash.addProduct()">Agregar</button>
+          <!-- Bloque Producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;">
+            <h3 style="margin:0 0 10px">Producto</h3>
+            <div id="p_form" class="row" style="display:none">
+              <input id="p_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Nombre del producto
+                  <input id="p_name" placeholder="Ej. Panettone"/>
+                </label>
+              </div>
+              <button class="btn" id="p_saveBtn" type="button">Guardar</button>
+              <button class="btn btn-red" id="p_cancelBtn" type="button">Cancelar</button>
+            </div>
+            <p id="p_hint" class="muted" style="margin:0">Selecciona “Editar” en el grid o “+ Nuevo producto”.</p>
           </div>
-          <hr/>
-          <div class="row">
-            <div style="flex:1"><label>Producto<select id="pt_product"></select></label></div>
-            <div style="flex:1"><label>Tipo<input id="pt_name"></label></div>
-            <button class="btn" onclick="dash.addProductType()">Agregar tipo</button>
+    
+          <!-- Bloque Tipos del producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;">
+            <h3 style="margin:0 0 10px">Tipos del producto</h3>
+            <p id="pt_title" class="muted" style="margin:0 0 8px">Selecciona un producto para gestionar sus tipos.</p>
+    
+            <div id="pt_form" class="row" style="display:none">
+              <input id="pt_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Tipo
+                  <input id="pt_name" placeholder="Ej. al pistacchio"/>
+                </label>
+              </div>
+              <button class="btn" id="pt_saveBtn" type="button">Guardar</button>
+              <button class="btn btn-red" id="pt_cancelBtn" type="button">Cancelar</button>
+            </div>
+    
+            <div class="row" style="margin:8px 0 10px">
+              <button class="btn" id="pt_newBtn" type="button" disabled>+ Nuevo tipo</button>
+            </div>
+    
+            <table id="tblTypesFor">
+              <thead>
+                <tr><th>Tipo</th><th style="width:120px">acciones</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
         </div>
+    
+        <!-- Columna derecha: Grid SOLO de productos -->
         <div>
-          <table id="tblProducts"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
-          <br/>
-          <table id="tblTypes"><thead><tr><th>id</th><th>product</th><th>type</th></tr></thead><tbody></tbody></table>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h3 style="margin:0">Productos</h3>
+            <button class="btn" id="p_newBtn" type="button">+ Nuevo producto</button>
+          </div>
+          <table id="tblProductsOnly">
+            <thead>
+              <tr><th>Producto</th><th style="width:120px">acciones</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </section>
