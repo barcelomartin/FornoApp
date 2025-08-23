@@ -123,37 +123,62 @@
   <main>
     <nav>
       <div class="group">
-        <h3>Menú Maestros</h3>
+        <h3>Inicio</h3>
         <div class="menu">
-          <a href="#usuarios"      data-panel="usuarios">Usuarios</a>
-          <a href="#productos"     data-panel="productos">Productos & Tipos</a>
-          <a href="#campanias"     data-panel="campanias">Campañas & Asignaciones</a>
+          <a href="#home" data-panel="home">Dashboard</a>
         </div>
       </div>
+    
+      <div class="group">
+        <h3>Menú Maestros</h3>
+        <div class="menu">
+          <a href="#usuarios"  data-panel="usuarios">Usuarios</a>
+          <a href="#productos" data-panel="productos">Productos & Tipos</a>
+          <a href="#campanias" data-panel="campanias">Campañas & Asignaciones</a>
+        </div>
+      </div>
+    
       <div class="group">
         <h3>Menú Reservas</h3>
         <div class="menu">
-          <a href="#reservas"      data-panel="reservas">Reservas</a>
+          <a href="#reservas"  data-panel="reservas">Reservas</a>
         </div>
       </div>
     </nav>
 
-    <!-- Usuarios -->
+    <!-- Usuarios (GRID + Nuevo/Editar) -->
     <section id="panel-usuarios" class="panel">
-      <h2>Usuarios</h2>
-      <div class="grid two">
-        <div>
-          <div class="row">
-            <div style="flex:1"><label>Nombre<input id="u_name"></label></div>
-            <div style="flex:1"><label>Contraseña<input id="u_pass" type="password"></label></div>
-            <button class="btn" onclick="dash.addUser()">Agregar</button>
-          </div>
-          <p class="muted">role: 1=admin, 2=operador</p>
-        </div>
-        <div>
-          <table id="tblUsers"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
+      <h2 style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Usuarios</span>
+        <button class="btn" id="u_newBtn" type="button">+ Nuevo</button>
+      </h2>
+    
+      <!-- Form inline (se muestra al crear/editar) -->
+      <div id="u_formWrap" class="grid two" style="display:none; margin-bottom:12px;">
+        <div class="row" style="grid-column:1 / -1;">
+          <input id="u_id" type="hidden"/>
+          <div style="flex:1"><label>Nombre<input id="u_name"></label></div>
+          <div style="flex:1"><label>Contraseña<input id="u_pass" type="password" placeholder="(dejar vacío para no cambiar)"></label></div>
+          <div style="width:160px"><label>Rol
+            <select id="u_role">
+              <option value="1">Admin</option>
+              <option value="2" selected>Operador</option>
+            </select>
+          </label></div>
+          <button class="btn" id="u_saveBtn" type="button">Guardar</button>
+          <button class="btn btn-red" id="u_cancelBtn" type="button">Cancelar</button>
         </div>
       </div>
+    
+      <!-- GRID -->
+      <table id="tblUsers">
+        <thead>
+          <tr><th>id</th><th>name</th><th>role</th><th style="width:120px">acciones</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    
+      <p class="muted" style="margin-top:8px;">role: 1=admin, 2=operador</p>
     </section>
 
     <!-- Productos & Tipos -->
