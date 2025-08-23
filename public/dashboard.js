@@ -170,7 +170,7 @@ function renderUsers(users){
 
 // -------- Carga inicial ----------
 async function loadAll(){
-  const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
+    const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
     api('/api/users').catch(()=>[]),
     api('/api/products').catch(()=>[]),
     api('/api/product_types').catch(()=>[]),
@@ -178,9 +178,15 @@ async function loadAll(){
     api('/api/campaign_products').catch(()=>[]),
     api('/api/reservations').catch(()=>[])
   ]);
-
+  
   renderUsers(users);
 
+  // NUEVO: productos y tipos al estado + renders
+  state.products = products || [];
+  state.types = types || [];
+  renderProductsOnly(state.products);
+  renderTypesFor(state.selectedProductId);
+  
   const typesFmt = types.map(t=>({id:t.id, product:t.product_id, type:t.name}));
   fillTable('tblProducts', products, ['id','name']);
   fillTable('tblTypes', typesFmt, ['id','product','type']);
