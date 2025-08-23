@@ -32,6 +32,45 @@ window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
 show(location.hash.slice(1) || 'home'); // por defecto: Dashboard
 
 // helpers
+function renderUsers(users){
+  const tb = document.querySelector('#tblUsers tbody');
+  tb.innerHTML = '';
+
+  const roleName = (r) => r === 1 ? 'Administrador' : 'Usuario';
+  const roleClass = (r) => r === 1 ? 'admin' : 'user';
+
+  users.forEach(u=>{
+    const tr = document.createElement('tr');
+
+    // Columna Usuario: avatar + nombre (SIN id)
+    const tdUser = document.createElement('td');
+    tdUser.innerHTML = `
+      <div class="user-cell">
+        <svg class="avatar ${roleClass(u.role)}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/>
+        </svg>
+        <span class="name">${u.name}</span>
+      </div>`;
+    tr.appendChild(tdUser);
+
+    // Columna Role: texto bonito
+    const tdRole = document.createElement('td');
+    tdRole.innerHTML = `<span class="role-badge">${roleName(u.role)}</span>`;
+    tr.appendChild(tdRole);
+
+    // Columna Acciones: Editar
+    const tdAct = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Editar';
+    btn.onclick = () => dash.u_edit(u);
+    tdAct.appendChild(btn);
+    tr.appendChild(tdAct);
+
+    tb.appendChild(tr);
+  });
+}
+
 async function api(path, opts){
   const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
   const data = await r.json().catch(()=> ({}));
@@ -73,7 +112,7 @@ async function loadAll(){
     api('/api/reservations').catch(()=>[])
   ]);
   // Usuarios grid
-  fillTable('tblUsers', users, ['id','name','role']);
+  renderUsers(users);
 
   // Resto como antes (si existen esos elementos)
   const typesFmt = types.map(t=>({id:t.id, product:t.product_id, type:t.name}));
