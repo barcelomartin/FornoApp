@@ -8,38 +8,105 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#faf7f2; --panel:#fff; --muted:#727272; --text:#1f1f1f;
-      --accent:#e55039; --accent2:#f37d62; --ring:0 8px 30px rgba(0,0,0,.08);
+      --white:#ffffff;
+      --bg:#fafafa;                 /* fondo general blanco roto */
+      --panel:#ffffff;              /* tarjetas */
+      --text:#1b1b1b;
+      --muted:#7a7a7a;
+  
+      /* Tricolore 🇮🇹 */
+      --green:#17a05d;              /* verde principal */
+      --green-100:#e7f6ee;
+      --red:#e23b3b;                /* rojo principal */
+      --red-100:#fdecec;
+      --line:#ececec;
+  
+      --ring:0 12px 32px rgba(0,0,0,.06);
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;
-      box-shadow:var(--ring); position:sticky; top:0; z-index:10}
-    header .brand{display:flex;gap:10px;align-items:center}
-    header .brand img{width:36px;height:36px;border-radius:50%}
-    header .brand h1{font-size:18px;margin:0}
-    header .actions{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:14px}
-    header button{border:0;background:#f6f6f6;padding:8px 12px;border-radius:10px;cursor:pointer}
-    main{display:grid;grid-template-columns:240px 1fr;gap:16px;padding:16px;max-width:1200px;margin:0 auto}
-    nav{background:var(--panel);border-radius:14px;box-shadow:var(--ring);padding:10px}
-    .group{margin-bottom:12px}
-    .group h3{margin:8px 8px 6px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
-    .menu a{display:block;padding:10px 12px;border-radius:10px;color:inherit;text-decoration:none}
-    .menu a:hover{background:#f6f6f6}
-    .menu a.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-    section.panel{background:var(--panel);border-radius:14px;box-shadow:var(--ring);padding:16px;display:none}
-    section.panel.active{display:block}
-    h2{margin:4px 0 12px}
-    .grid{display:grid;gap:12px}
+  
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        linear-gradient(0deg, rgba(0,0,0,.02), rgba(0,0,0,0)) 0 0/100% 240px no-repeat,
+        var(--bg);
+    }
+  
+    /* ---------- Header ---------- */
+    header{
+      position:sticky; top:0; z-index:10;
+      background:var(--panel);
+      box-shadow:var(--ring);
+      padding:12px 18px 8px;
+    }
+    header::after{               /* franja tricolor */
+      content:"";
+      display:block; height:4px; margin-top:8px; border-radius:2px;
+      background:linear-gradient(90deg, var(--green) 0 33.33%, #ffffff 33.33% 66.66%, var(--red) 66.66% 100%);
+    }
+    header .brand{display:flex; align-items:center; gap:12px}
+    header .brand img{width:34px; height:34px; border-radius:50%}
+    header .brand h1{font-size:18px; margin:0}
+    header .actions{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:14px}
+    header .btn{padding:8px 12px}
+  
+    /* ---------- Layout ---------- */
+    main{max-width:1200px; margin:16px auto; padding:0 16px;
+         display:grid; grid-template-columns:260px 1fr; gap:18px;}
+    nav{background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--ring); padding:12px}
+    .group{margin-bottom:14px}
+    .group h3{margin:8px 10px 6px; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em}
+    .menu a{
+      display:block; padding:10px 12px; border-radius:10px; color:inherit; text-decoration:none;
+      border:1px solid transparent; transition:.15s;
+    }
+    .menu a:hover{ background:#f7f7f7; border-color:var(--line) }
+    .menu a.active{
+      background:var(--green); color:#fff; border-color:var(--green);
+      box-shadow:0 10px 24px rgba(23,160,93,.25);
+    }
+  
+    section.panel{
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:14px; box-shadow:var(--ring); padding:16px; display:none;
+    }
+    section.panel.active{ display:block }
+    h2{margin:6px 0 14px}
+  
+    /* ---------- Form & tables ---------- */
+    .grid{display:grid; gap:14px}
     .two{grid-template-columns:1fr 1fr}
-    table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid #eee;padding:8px 10px;text-align:left;font-size:14px}
-    input,select,button{font:inherit}
-    input,select{width:100%;padding:9px 10px;border:1px solid #e5e5e5;border-radius:10px;background:#fff}
-    .btn{border:0;padding:10px 12px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;cursor:pointer}
-    .row{display:flex;gap:12px;align-items:end}
-    .muted{color:var(--muted);font-size:13px}
-  </style>
+    .row{display:flex; gap:12px; align-items:end}
+    label{font-size:13px; color:var(--muted)}
+    input,select{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#fff;
+      outline:none; transition:border .15s, box-shadow .15s;
+    }
+    input:focus, select:focus{ border-color:var(--green); box-shadow:0 0 0 4px var(--green-100) }
+  
+    table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden}
+    th,td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; font-size:14px}
+    thead th{background:#fafafa; font-weight:600}
+  
+    /* ---------- Buttons ---------- */
+    .btn{
+      border:0; border-radius:10px; cursor:pointer; color:#fff; font-weight:600;
+      background:linear-gradient(135deg, var(--green), #1ec173);
+      padding:10px 14px; transition:transform .06s ease, filter .2s ease, box-shadow .2s ease;
+      box-shadow:0 10px 24px rgba(23,160,93,.25);
+    }
+    .btn:active{ transform:translateY(1px) }
+    .btn:disabled{ filter:grayscale(.4); opacity:.7; cursor:not-allowed }
+    .btn-red{
+      background:linear-gradient(135deg, var(--red), #ff6a6a);
+      box-shadow:0 10px 24px rgba(226,59,59,.25);
+    }
+  
+    .muted{color:var(--muted); font-size:13px}
+</style>
 </head>
 <body>
   <header>
