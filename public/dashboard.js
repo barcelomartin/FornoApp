@@ -2,27 +2,34 @@
 const me = JSON.parse(localStorage.getItem('forno_user') || 'null');
 if (!me) location.href = '/login.html';
 
-// ui
+// ui header
 const who = document.getElementById('who');
-who.textContent = `Usuario: ${me?.name}`;
-document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('forno_user'); location.href='/login.html'; };
+if (who) who.textContent = `Usuario: ${me?.name}`;
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) logoutBtn.onclick = () => { localStorage.removeItem('forno_user'); location.href='/login.html'; };
 
 // router simple por hash
 const links = [...document.querySelectorAll('a[data-panel]')];
 const panels = {
+  home:      document.getElementById('panel-home'),
   usuarios:  document.getElementById('panel-usuarios'),
   productos: document.getElementById('panel-productos'),
   campanias: document.getElementById('panel-campanias'),
   reservas:  document.getElementById('panel-reservas'),
 };
-function show(panel){
-  Object.values(panels).forEach(p=>p.classList.remove('active'));
+function show(panel) {
+  Object.values(panels).forEach(p=>p && p.classList.remove('active'));
   links.forEach(a=>a.classList.remove('active'));
-  (panels[panel]||panels.usuarios).classList.add('active');
-  (links.find(a=>a.dataset.panel===panel)||links[0]).classList.add('active');
+  if (panels[panel]) {
+    panels[panel].classList.add('active');
+    const link = links.find(a=>a.dataset.panel===panel);
+    if (panel !== 'home' && link) link.classList.add('active'); // en Home no marcamos menú
+  } else {
+    panels.home?.classList.add('active');
+  }
 }
 window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
-show(location.hash.slice(1)||'usuarios');
+show(location.hash.slice(1) || 'home'); // por defecto: Dashboard
 
 // helpers
 async function api(path, opts){
@@ -31,21 +38,31 @@ async function api(path, opts){
   if(!r.ok) throw new Error(data?.error||'Error');
   return data;
 }
-const el = sel => document.querySelector(sel);
+const $ = sel => document.querySelector(sel);
 const fillTable = (tblId, rows, cols) => {
-  const tb = document.querySelector(`#${tblId} tbody`); tb.innerHTML = '';
+  const tb = document.querySelector(`#${tblId} tbody`); if (!tb) return;
+  tb.innerHTML = '';
   rows.forEach(r=>{
     const tr = document.createElement('tr');
     cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=r[c]??''; tr.appendChild(td); });
+    const tdAct = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Editar';
+    btn.dataset.id = r.id;
+    btn.onclick = () => dash.u_edit(r);
+    tdAct.appendChild(btn);
+    tr.appendChild(tdAct);
     tb.appendChild(tr);
   });
 };
 const fillSelect = (selId, rows, value='id', label='name')=>{
-  const s = document.getElementById(selId); s.innerHTML='';
+  const s = document.getElementById(selId); if (!s) return;
+  s.innerHTML='';
   rows.forEach(r=>{ const o=document.createElement('option'); o.value=r[value]; o.textContent=r[label]; s.appendChild(o); });
 };
 
-// carga inicial
+// -------- Carga inicial (lo que ya tenías) ----------
 async function loadAll(){
   const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
     api('/api/users').catch(()=>[]),
@@ -55,9 +72,12 @@ async function loadAll(){
     api('/api/campaign_products').catch(()=>[]),
     api('/api/reservations').catch(()=>[])
   ]);
-  fillTable('tblUsers', users, ['id','name']);
-  fillTable('tblProducts', products, ['id','name']);
+  // Usuarios grid
+  fillTable('tblUsers', users, ['id','name','role']);
+
+  // Resto como antes (si existen esos elementos)
   const typesFmt = types.map(t=>({id:t.id, product:t.product_id, type:t.name}));
+  fillTable('tblProducts', products, ['id','name']);
   fillTable('tblTypes', typesFmt, ['id','product','type']);
   fillTable('tblCampaigns', campaigns, ['id','name','start_date','end_date']);
   fillTable('tblCampaignProducts', campProds, ['id','campaign_id','product_id']);
@@ -66,70 +86,86 @@ async function loadAll(){
   fillSelect('pt_product', products);
   fillSelect('cp_campaign', campaigns);
   fillSelect('cp_product', products);
-  // para crear reservas: listar tipos
   fillSelect('r_type', types, 'id', 'name');
 }
 loadAll().catch(console.error);
 
-// acciones (Usuarios)
-export const dash = {
-  async addUser(){
-    const name = el('#u_name').value.trim();
-    const password = el('#u_pass').value;
-    if(!name || !password) return alert('Completa nombre y contraseña');
-    await api('/api/users', { method:'POST', body:JSON.stringify({ name, password, role:2 }) });
-    el('#u_name').value=''; el('#u_pass').value='';
-    loadAll();
-  },
+// -------- Usuarios: Nuevo / Editar ----------
+const uWrap = $('#u_formWrap');
+const uNewBtn = $('#u_newBtn');
+const uSaveBtn = $('#u_saveBtn');
+const uCancelBtn = $('#u_cancelBtn');
 
-  // Productos
+function u_showForm(show){ uWrap.style.display = show ? 'grid' : 'none'; }
+function u_fillForm(user) {
+  $('#u_id').value   = user?.id ?? '';
+  $('#u_name').value = user?.name ?? '';
+  $('#u_pass').value = ''; // nunca precargamos pass
+  $('#u_role').value = user?.role ?? '2';
+}
+
+uNewBtn?.addEventListener('click', () => { u_fillForm(null); u_showForm(true); });
+uCancelBtn?.addEventListener('click', () => { u_showForm(false); });
+
+uSaveBtn?.addEventListener('click', async () => {
+  const id   = $('#u_id').value.trim();
+  const name = $('#u_name').value.trim();
+  const pass = $('#u_pass').value;
+  const role = parseInt($('#u_role').value || '2', 10);
+  if (!name) return alert('Nombre requerido');
+
+  if (!id) {
+    // create
+    await api('/api/users', { method:'POST', body:JSON.stringify({ name, password:pass || '1234', role }) });
+  } else {
+    // update (pass opcional)
+    const payload = { id, name, role };
+    if (pass) payload.password = pass;
+    await api('/api/users', { method:'PUT', body:JSON.stringify(payload) });
+  }
+  u_showForm(false);
+  await loadAll();
+});
+
+export const dash = {
+  u_edit(user){ u_fillForm(user); u_showForm(true); },
+
+  // — (opcional) deja tus funciones previas aquí si ya las usas —
   async addProduct(){
-    const name = el('#p_name').value.trim();
-    if(!name) return;
+    const name = $('#p_name')?.value?.trim(); if(!name) return;
     await api('/api/products', { method:'POST', body:JSON.stringify({ name }) });
-    el('#p_name').value='';
-    loadAll();
+    $('#p_name').value=''; loadAll();
   },
   async addProductType(){
-    const product_id = el('#pt_product').value;
-    const name = el('#pt_name').value.trim();
+    const product_id = $('#pt_product').value;
+    const name = $('#pt_name').value.trim();
     if(!product_id || !name) return;
     await api('/api/product_types', { method:'POST', body:JSON.stringify({ product_id, name }) });
-    el('#pt_name').value='';
-    loadAll();
+    $('#pt_name').value=''; loadAll();
   },
-
-  // Campañas
   async addCampaign(){
-    const name = el('#c_name').value.trim();
-    const start_date = el('#c_start').value;
-    const end_date = el('#c_end').value;
-    if(!name || !start_date || !end_date) return alert('Completa todos los campos');
+    const name=$('#c_name').value.trim(), start_date=$('#c_start').value, end_date=$('#c_end').value;
+    if(!name||!start_date||!end_date) return alert('Completa todos los campos');
     await api('/api/campaigns', { method:'POST', body:JSON.stringify({ name, start_date, end_date }) });
-    el('#c_name').value=''; el('#c_start').value=''; el('#c_end').value='';
-    loadAll();
+    $('#c_name').value=''; $('#c_start').value=''; $('#c_end').value=''; loadAll();
   },
   async addCampaignProduct(){
-    const campaign_id = el('#cp_campaign').value;
-    const product_id  = el('#cp_product').value;
-    if(!campaign_id || !product_id) return;
+    const campaign_id=$('#cp_campaign').value, product_id=$('#cp_product').value;
+    if(!campaign_id||!product_id) return;
     await api('/api/campaign_products', { method:'POST', body:JSON.stringify({ campaign_id, product_id }) });
     loadAll();
   },
-
-  // Reservas
   async createReservation(){
-    const client_name = el('#r_client').value.trim();
-    const phone = el('#r_phone').value.trim();
-    const product_type_id = el('#r_type').value;
-    const quantity = parseInt(el('#r_qty').value||'1',10);
-    if(!client_name || !phone || !product_type_id || quantity<1) return alert('Datos incompletos');
+    const client_name=$('#r_client').value.trim();
+    const phone=$('#r_phone').value.trim();
+    const product_type_id=$('#r_type').value;
+    const quantity=parseInt($('#r_qty').value||'1',10);
+    if(!client_name||!phone||!product_type_id||quantity<1) return alert('Datos incompletos');
     await api('/api/reservations', {
       method:'POST',
       body:JSON.stringify({ client_name, phone, items:[{ product_type_id, quantity }] })
     });
-    el('#r_client').value=''; el('#r_phone').value='';
-    loadAll();
+    $('#r_client').value=''; $('#r_phone').value=''; loadAll();
   }
 };
 window.dash = dash;
