@@ -100,7 +100,8 @@
     input:focus, select:focus{ border-color:var(--green); box-shadow:0 0 0 4px var(--green-100) }
 
     table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden}
-    th,td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; font-size:14px}
+    #tblUsers th, #tblUsers td{ padding:8px 10px; }             /* compacto para usuarios */
+    th,td{border-bottom:1px solid var(--line); text-align:left; font-size:14px; vertical-align:middle}
     thead th{background:#fafafa; font-weight:600}
 
     /* ---------- Buttons ---------- */
@@ -121,7 +122,7 @@
 
     /* ---------- Users grid: avatar & role ---------- */
     .user-cell{ display:flex; align-items:center; gap:10px; }
-    .user-cell .avatar{ width:26px; height:26px; color:#111; }
+    .user-cell .avatar{ width:22px; height:22px; min-width:22px; display:inline-block; color:#111; }
     .user-cell .avatar.admin{ color:#2c67b7; }  /* azul admin */
     .user-cell .avatar.user{  color:#111111; }  /* negro usuario */
     .user-cell .name{ font-weight:600; }
