@@ -191,14 +191,11 @@
           <input id="u_id" type="hidden"/>
           <div style="flex:1"><label>Nombre<input id="u_name"></label></div>
           <div style="flex:1"><label>Contraseña<input id="u_pass" type="password" placeholder="(dejar vacío para no cambiar)"></label></div>
-          <div style="width:160px"><label>Rol<select id="u_role">
+          <div style="width:160px"><label>Rol
             <select id="u_role">
               <option value="1">Admin</option>
-              <option value="2">Usuario</option>
+              <option value="2" selected>Operador</option>
             </select>
-          </label></div>
-          <div style="width:100px"><label>Activo
-            <input id="u_active" type="checkbox" checked>
           </label></div>
           <button class="btn" id="u_saveBtn" type="button">Guardar</button>
           <button class="btn btn-red" id="u_cancelBtn" type="button">Cancelar</button>
@@ -210,14 +207,11 @@
         <thead>
           <tr>
             <th>Usuario</th>
-            <th>Role</th><th>Estado</th>
+            <th>Role</th>
             <th style="width:120px">acciones</th>
           </tr>
         </thead>
         <tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style>
       </table>
       <p class="muted" style="margin-top:8px;">role: 1=admin, 2=operador</p>
     </section>
@@ -239,15 +233,9 @@
           </div>
         </div>
         <div>
-          <table id="tblProducts"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style></table>
+          <table id="tblProducts"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
           <br/>
-          <table id="tblTypes"><thead><tr><th>id</th><th>product</th><th>type</th></tr></thead><tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style></table>
+          <table id="tblTypes"><thead><tr><th>id</th><th>product</th><th>type</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
     </section>
@@ -271,15 +259,9 @@
           </div>
         </div>
         <div>
-          <table id="tblCampaigns"><thead><tr><th>id</th><th>name</th><th>inicio</th><th>fin</th></tr></thead><tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style></table>
+          <table id="tblCampaigns"><thead><tr><th>id</th><th>name</th><th>inicio</th><th>fin</th></tr></thead><tbody></tbody></table>
           <br/>
-          <table id="tblCampaignProducts"><thead><tr><th>id</th><th>campaign</th><th>product</th></tr></thead><tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style></table>
+          <table id="tblCampaignProducts"><thead><tr><th>id</th><th>campaign</th><th>product</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
     </section>
@@ -300,10 +282,7 @@
           </div>
         </div>
         <div>
-          <table id="tblReservations"><thead><tr><th>id</th><th>cliente</th><th>tel</th><th>status</th><th>fecha</th></tr></thead><tbody></tbody>
-<style>
-  .ico-check { width:16px; height:16px; vertical-align:middle }
-</style></table>
+          <table id="tblReservations"><thead><tr><th>id</th><th>cliente</th><th>tel</th><th>status</th><th>fecha</th></tr></thead><tbody></tbody></table>
         </div>
       </div>
     </section>
