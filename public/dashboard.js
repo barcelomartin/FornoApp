@@ -1,448 +1,237 @@
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) logoutBtn.onclick = () => { localStorage.removeItem('forno_user'); location.href='/login.html'; };
+// ===== helpers =====
+const $ = s => document.querySelector(s);
+async function api(path, opts) {
+  const r = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const d = await r.json().catch(()=> ({}));
+  if (!r.ok) throw new Error(d?.error || 'Error');
+  return d;
+}
 
-// router simple por hash
-// ----------------- Router simple por hash -----------------
+// ===== guard login =====
+const me = JSON.parse(localStorage.getItem('forno_user') || 'null');
+if (!me) location.href = '/login.html';
+$('#who').textContent = `Usuario: ${me.name}`;
+$('#logoutBtn').onclick = () => { localStorage.removeItem('forno_user'); location.href='/login.html'; };
+
+// ===== router =====
 const links = [...document.querySelectorAll('a[data-panel]')];
 const panels = {
-home:      document.getElementById('panel-home'),
-@@ -31,72 +31,7 @@ function show(panel) {
-window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
-show(location.hash.slice(1) || 'home'); // por defecto: Dashboard
-
-// ------------- helpers -------------
-// ===== Estado para productos/tipos =====
-const state = {
-  products: [],
-  types: [],
-  selectedProductId: null
+  home: null,
+  usuarios: $('#panel-usuarios'),
+  productos: $('#panel-productos'),
+  campanias: $('#panel-campanias'),
+  reservas: $('#panel-reservas')
 };
-
-// Render productos (solo nombre + Editar)
-function renderProductsOnly(products){
-  state.products = products || [];
-  const tb = document.querySelector('#tblProductsOnly tbody');
-  tb.innerHTML = '';
-  state.products.forEach(p=>{
-    const tr = document.createElement('tr');
-    const tdName = document.createElement('td');
-    tdName.textContent = p.name;
-    tr.appendChild(tdName);
-
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => p_edit(p);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-
-    tb.appendChild(tr);
-  });
-}
-
-// Render tipos del producto seleccionado
-function renderTypesFor(productId){
-  const product = state.products.find(p=>p.id===productId);
-  const tb = document.querySelector('#tblTypesFor tbody');
-  const title = document.getElementById('pt_title');
-  const ptNewBtn = document.getElementById('pt_newBtn');
-
-  tb.innerHTML = '';
-  if (!product) {
-    title.textContent = 'Selecciona un producto para gestionar sus tipos.';
-    ptNewBtn.disabled = true;
-    return;
+function show(panel){
+  Object.values(panels).forEach(p=>p&&p.classList.remove('active'));
+  links.forEach(a=>a.classList.remove('active'));
+  if (panels[panel]) {
+    panels[panel].classList.add('active');
+    links.find(a=>a.dataset.panel===panel)?.classList.add('active');
   }
-  title.textContent = `Tipos de: ${product.name}`;
-  ptNewBtn.disabled = false;
-
-  const list = state.types.filter(t=>t.product_id === productId);
-  list.forEach(t=>{
-    const tr = document.createElement('tr');
-    const tdName = document.createElement('td');
-    tdName.textContent = t.name;
-    tr.appendChild(tdName);
-
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => pt_edit(t);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-
-    tb.appendChild(tr);
-  });
 }
+window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
+show(location.hash.slice(1) || 'usuarios');
 
-// ----------------- Helpers -----------------
-async function api(path, opts){
-const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
-const data = await r.json().catch(()=> ({}));
-@@ -110,14 +45,6 @@ const fillTable = (tblId, rows, cols) => {
-rows.forEach(r=>{
-const tr = document.createElement('tr');
-cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=r[c]??''; tr.appendChild(td); });
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.dataset.id = r.id;
-    btn.onclick = () => dash.u_edit(r);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-tb.appendChild(tr);
-});
-};
-@@ -127,9 +54,12 @@ const fillSelect = (selId, rows, value='id', label='name')=>{
-rows.forEach(r=>{ const o=document.createElement('option'); o.value=r[value]; o.textContent=r[label]; s.appendChild(o); });
-};
-
-// -------- Usuarios: render especial (avatar pequeño + role bonito, SIN id) ----------
 // ==========================================================
-//                       USUARIOS
+//                           USUARIOS
 // ==========================================================
 function renderUsers(users){
-const tb = document.querySelector('#tblUsers tbody');
-  if (!tb) return;
-tb.innerHTML = '';
-
-users.forEach(u=>{
-@@ -168,61 +98,28 @@ function renderUsers(users){
-});
-}
-
-// -------- Carga inicial ----------
-async function loadAll(){
-    const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
-    api('/api/users').catch(()=>[]),
-    api('/api/products').catch(()=>[]),
-    api('/api/product_types').catch(()=>[]),
-    api('/api/campaigns').catch(()=>[]),
-    api('/api/campaign_products').catch(()=>[]),
-    api('/api/reservations').catch(()=>[])
-  ]);
-  
-  renderUsers(users);
-
-  // NUEVO: productos y tipos al estado + renders
-  state.products = products || [];
-  state.types = types || [];
-  renderProductsOnly(state.products);
-  renderTypesFor(state.selectedProductId);
-  
-  const typesFmt = types.map(t=>({id:t.id, product:t.product_id, type:t.name}));
-  fillTable('tblProducts', products, ['id','name']);
-  fillTable('tblTypes', typesFmt, ['id','product','type']);
-  fillTable('tblCampaigns', campaigns, ['id','name','start_date','end_date']);
-  fillTable('tblCampaignProducts', campProds, ['id','campaign_id','product_id']);
-  fillTable('tblReservations', reservations, ['id','client_name','phone','status','created_at']);
-
-  fillSelect('pt_product', products);
-  fillSelect('cp_campaign', campaigns);
-  fillSelect('cp_product', products);
-  fillSelect('r_type', types, 'id', 'name');
-}
-loadAll().catch(console.error);
-
-// -------- Usuarios: Nuevo / Editar ----------
-const uWrap = $('#u_formWrap');
-const uNewBtn = $('#u_newBtn');
-const uSaveBtn = $('#u_saveBtn');
-const uCancelBtn = $('#u_cancelBtn');
-
-function u_showForm(show){ uWrap.style.display = show ? 'grid' : 'none'; }
-function u_showForm(show){ if (uWrap) uWrap.style.display = show ? 'grid' : 'none'; }
-function u_fillForm(user) {
-  $('#u_id').value   = user?.id ?? '';
-  $('#u_name').value = user?.name ?? '';
-  $('#u_pass').value = ''; // nunca precargamos pass
-  $('#u_role').value = user?.role ?? '2';
-  const fid = $('#u_id'), fname = $('#u_name'), fpass = $('#u_pass'), frole = $('#u_role');
-  if (fid)   fid.value   = user?.id ?? '';
-  if (fname) fname.value = user?.name ?? '';
-  if (fpass) fpass.value = ''; // nunca precargamos pass
-  if (frole) frole.value = user?.role ?? '2';
-}
-
-uNewBtn?.addEventListener('click', () => { u_fillForm(null); u_showForm(true); });
-uCancelBtn?.addEventListener('click', () => { u_showForm(false); });
-
-uSaveBtn?.addEventListener('click', async () => {
-  const id   = $('#u_id').value.trim();
-  const name = $('#u_name').value.trim();
-  const pass = $('#u_pass').value;
-  const role = parseInt($('#u_role').value || '2', 10);
-  const id   = $('#u_id')?.value?.trim() || '';
-  const name = $('#u_name')?.value?.trim() || '';
-  const pass = $('#u_pass')?.value || '';
-  const role = parseInt($('#u_role')?.value || '2', 10);
-if (!name) return alert('Nombre requerido');
-
-if (!id) {
-@@ -236,45 +133,243 @@ uSaveBtn?.addEventListener('click', async () => {
-await loadAll();
-});
-
-export const dash = {
-  u_edit(user){ u_fillForm(user); u_showForm(true); },
-// ==========================================================
-//                   PRODUCTOS & TIPOS
-// ==========================================================
-const state = {
-  products: [],
-  types: [],
-  selectedProductId: null
-};
-
-// ---- Grids de productos / tipos (solo vista) ----
-function renderProductsOnly(products){
-  state.products = products || [];
-  const tb = document.querySelector('#tblProductsOnly tbody');
-  if (!tb) return;
-  tb.innerHTML = '';
-  state.products.forEach(p=>{
-    const tr = document.createElement('tr');
-
-    const tdName = document.createElement('td');
-    tdName.textContent = p.name;
-    tr.appendChild(tdName);
-
-  // Resto (productos/campañas/reservas) igual que tenías:
-  async addProduct(){
-    const name = $('#p_name')?.value?.trim(); if(!name) return;
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => p_edit(p);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-
+  const tb = $('#tblUsers tbody'); tb.innerHTML='';
+  users.forEach(u=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="user-cell">
+          <svg class="avatar ${Number(u.role)===1?'admin':'user'}" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/>
+          </svg>
+          ${u.name}
+        </div>
+      </td>
+      <td><span class="role-badge">${Number(u.role)===1?'Administrador':'Usuario'}</span></td>
+      <td><button class="btn u-edit">Editar</button></td>`;
+    tr.querySelector('.u-edit').onclick=()=>dash.u_edit(u);
     tb.appendChild(tr);
   });
 }
 
-function renderTypesFor(productId){
-  const product = state.products.find(p=>p.id===productId);
-  const tb = document.querySelector('#tblTypesFor tbody');
-  const title = document.getElementById('pt_title');
-  const ptNewBtn = document.getElementById('pt_newBtn');
-
-  if (!tb || !title || !ptNewBtn) return;
-
-  tb.innerHTML = '';
-  if (!product) {
-    title.textContent = 'Selecciona un producto para gestionar sus tipos.';
-    ptNewBtn.disabled = true;
-    return;
+const uWrap=$('#u_formWrap'), uNewBtn=$('#u_newBtn'), uSaveBtn=$('#u_saveBtn'), uCancelBtn=$('#u_cancelBtn');
+function u_showForm(s){ uWrap.style.display= s?'flex':'none'; }
+function u_fillForm(u){ $('#u_id').value=u?.id??''; $('#u_name').value=u?.name??''; $('#u_pass').value=''; $('#u_role').value=u?.role??'2'; }
+uNewBtn?.addEventListener('click',()=>{u_fillForm(null);u_showForm(true);});
+uCancelBtn?.addEventListener('click',()=>u_showForm(false));
+uSaveBtn?.addEventListener('click', async ()=>{
+  const id=$('#u_id').value.trim(), name=$('#u_name').value.trim(), pass=$('#u_pass').value, role=parseInt($('#u_role').value||'2',10);
+  if(!name) return alert('Nombre requerido');
+  if(!id) await api('/api/users',{method:'POST',body:JSON.stringify({name,password:pass||'1234',role})});
+  else{
+    const payload={id,name,role}; if(pass) payload.password=pass;
+    await api('/api/users',{method:'PUT',body:JSON.stringify(payload)});
   }
-  title.textContent = `Tipos de: ${product.name}`;
-  ptNewBtn.disabled = false;
+  u_showForm(false); await loadAll();
+});
 
-  const list = state.types.filter(t=>t.product_id === productId);
-  list.forEach(t=>{
-    const tr = document.createElement('tr');
+// ==========================================================
+//                     PRODUCTOS & TIPOS (CRUD)
+// ==========================================================
+const state = { products:[], types:[], selectedProductId:null };
 
-    const tdName = document.createElement('td');
-    tdName.textContent = t.name;
-    tr.appendChild(tdName);
-
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => pt_edit(t);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
-
-    tb.appendChild(tr);
-  });
-}
-
-// ---- Form PRODUCTO ----
-const pForm     = document.getElementById('p_form');
-const pHint     = document.getElementById('p_hint');
-const pNewBtn   = document.getElementById('p_newBtn');
-const pSaveBtn  = document.getElementById('p_saveBtn');
-const pCancelBtn= document.getElementById('p_cancelBtn');
-
-function p_showForm(show){
-  if (pForm) pForm.style.display = show ? 'flex' : 'none';
-  if (pHint) pHint.style.display = show ? 'none' : 'block';
-}
-function p_fillForm(p){
-  const id   = document.getElementById('p_id');
-  const name = document.getElementById('p_name');
-  if (id)   id.value   = p?.id ?? '';
-  if (name) name.value = p?.name ?? '';
-}
-function p_select(productId){
-  state.selectedProductId = productId || null;
-  renderTypesFor(state.selectedProductId);
-}
-function p_new(){
-  p_fillForm(null);
-  p_showForm(true);
-}
-function p_edit(p){
-  p_fillForm(p);
-  p_showForm(true);
-  p_select(p.id);
-}
-async function p_save(){
-  const id   = document.getElementById('p_id')?.value?.trim() || '';
-  const name = document.getElementById('p_name')?.value?.trim() || '';
-  if (!name) return alert('Nombre requerido');
-
-  if (!id){
-await api('/api/products', { method:'POST', body:JSON.stringify({ name }) });
-    $('#p_name').value=''; loadAll();
-  },
-  async addProductType(){
-    const product_id = $('#pt_product').value;
-    const name = $('#pt_name').value.trim();
-    if(!product_id || !name) return;
-  } else {
-    await api('/api/products', { method:'PUT', body:JSON.stringify({ id, name }) });
-  }
+// -- formulario de producto
+const pForm = $('#p_form'), pNewBtn=$('#p_newBtn'), pSaveBtn=$('#p_saveBtn'), pCancelBtn=$('#p_cancelBtn');
+function p_showForm(s){ pForm.style.display = s?'flex':'none'; }
+function p_fillForm(p){ $('#p_id').value=p?.id??''; $('#p_name').value=p?.name??''; }
+pNewBtn?.addEventListener('click',()=>{ state.selectedProductId=null; p_fillForm(null); p_showForm(true); });
+pCancelBtn?.addEventListener('click',()=>p_showForm(false));
+pSaveBtn?.addEventListener('click', async ()=>{
+  const id=$('#p_id').value.trim(), name=$('#p_name').value.trim();
+  if(!name) return alert('Nombre de producto requerido');
+  if(!id) await api('/api/products',{method:'POST',body:JSON.stringify({name})});
+  else await api('/api/products',{method:'PUT',body:JSON.stringify({id,name})});
   p_showForm(false);
-  await loadAll();
-}
-function p_cancel(){ p_showForm(false); }
-
-pNewBtn?.addEventListener('click', p_new);
-pSaveBtn?.addEventListener('click', p_save);
-pCancelBtn?.addEventListener('click', p_cancel);
-
-// ---- Form TIPOS ----
-const ptForm      = document.getElementById('pt_form');
-const ptNewBtn    = document.getElementById('pt_newBtn');
-const ptSaveBtn   = document.getElementById('pt_saveBtn');
-const ptCancelBtn = document.getElementById('pt_cancelBtn');
-
-function pt_showForm(show){ if (ptForm) ptForm.style.display = show ? 'flex' : 'none'; }
-function pt_fillForm(t){
-  const id   = document.getElementById('pt_id');
-  const name = document.getElementById('pt_name');
-  if (id)   id.value   = t?.id ?? '';
-  if (name) name.value = t?.name ?? '';
-}
-function pt_new(){
-  if (!state.selectedProductId) return alert('Selecciona antes un producto.');
-  pt_fillForm(null);
-  pt_showForm(true);
-}
-function pt_edit(t){
-  p_select(t.product_id); // asegura que esté seleccionado
-  pt_fillForm(t);
-  pt_showForm(true);
-}
-async function pt_save(){
-  if (!state.selectedProductId) return alert('Selecciona antes un producto.');
-  const id   = document.getElementById('pt_id')?.value?.trim() || '';
-  const name = document.getElementById('pt_name')?.value?.trim() || '';
-  const product_id = state.selectedProductId;
-  if (!name) return alert('Nombre del tipo requerido');
-
-  if (!id){
-await api('/api/product_types', { method:'POST', body:JSON.stringify({ product_id, name }) });
-    $('#pt_name').value=''; loadAll();
-  },
-  } else {
-    await api('/api/product_types', { method:'PUT', body:JSON.stringify({ id, name, product_id }) });
-  }
-  pt_showForm(false);
-  await loadAll();
-}
-function pt_cancel(){ pt_showForm(false); }
-
-ptNewBtn?.addEventListener('click', pt_new);
-ptSaveBtn?.addEventListener('click', pt_save);
-ptCancelBtn?.addEventListener('click', pt_cancel);
-
-// ==========================================================
-//              CAMPAÑAS / RESERVAS (igual que antes)
-// ==========================================================
-export const dash = {
-  u_edit(user){ u_fillForm(user); u_showForm(true); },
-
-async addCampaign(){
-    const name=$('#c_name').value.trim(), start_date=$('#c_start').value, end_date=$('#c_end').value;
-    const name=$('#c_name')?.value?.trim();
-    const start_date=$('#c_start')?.value;
-    const end_date=$('#c_end')?.value;
-if(!name||!start_date||!end_date) return alert('Completa todos los campos');
-await api('/api/campaigns', { method:'POST', body:JSON.stringify({ name, start_date, end_date }) });
-    $('#c_name').value=''; $('#c_start').value=''; $('#c_end').value=''; loadAll();
-    if ($('#c_name')) $('#c_name').value='';
-    if ($('#c_start')) $('#c_start').value='';
-    if ($('#c_end')) $('#c_end').value='';
-    loadAll();
-},
-
-async addCampaignProduct(){
-    const campaign_id=$('#cp_campaign').value, product_id=$('#cp_product').value;
-    const campaign_id=$('#cp_campaign')?.value;
-    const product_id=$('#cp_product')?.value;
-if(!campaign_id||!product_id) return;
-await api('/api/campaign_products', { method:'POST', body:JSON.stringify({ campaign_id, product_id }) });
-loadAll();
-},
-
-async createReservation(){
-    const client_name=$('#r_client').value.trim();
-    const phone=$('#r_phone').value.trim();
-    const product_type_id=$('#r_type').value;
-    const quantity=parseInt($('#r_qty').value||'1',10);
-    const client_name=$('#r_client')?.value?.trim();
-    const phone=$('#r_phone')?.value?.trim();
-    const product_type_id=$('#r_type')?.value;
-    const quantity=parseInt($('#r_qty')?.value||'1',10);
-if(!client_name||!phone||!product_type_id||quantity<1) return alert('Datos incompletos');
-await api('/api/reservations', {
-method:'POST',
-body:JSON.stringify({ client_name, phone, items:[{ product_type_id, quantity }] })
+  await loadAll(id ? id : undefined); // vuelve a seleccionar si edité
 });
-    $('#r_client').value=''; $('#r_phone').value=''; loadAll();
-    if ($('#r_client')) $('#r_client').value='';
-    if ($('#r_phone')) $('#r_phone').value='';
-    loadAll();
+
+// -- render grid productos + expand con tipos
+function renderProductsGrid(){
+  const tb = $('#tblProductsGrid tbody'); tb.innerHTML='';
+
+  if(!state.products.length){
+    const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=3; td.innerHTML='<span class="muted">No hay productos</span>'; tr.appendChild(td); tb.appendChild(tr); return;
+  }
+
+  state.products.forEach(p=>{
+    const tipos = state.types.filter(t=>t.product_id===p.id);
+
+    // Fila principal del producto
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td><span class="pill">${tipos.length}</span></td>
+      <td style="display:flex;gap:8px">
+        <button class="btn verTipos">Ver tipos</button>
+        <button class="btn gray p-edit">Editar</button>
+      </td>`;
+    tb.appendChild(tr);
+
+    // Fila expandida con tabla de tipos + formulario tipo
+    const tr2=document.createElement('tr'); tr2.className='expand-row'; tr2.style.display='none';
+    const td=document.createElement('td'); td.colSpan=3; td.innerHTML = `
+      <div class="expand-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <strong style="margin-right:auto">Tipos de ${p.name}</strong>
+          <button class="btn secondary pt-new">+ Nuevo tipo</button>
+        </div>
+        <div class="pt-form form-inline" style="display:none">
+          <input class="pt-id" type="hidden"/>
+          <input class="pt-name" placeholder="Nombre del tipo"/>
+          <button class="btn pt-save">Guardar</button>
+          <button class="btn gray pt-cancel">Cancelar</button>
+        </div>
+        <table class="pt-table" style="margin-top:6px">
+          <thead><tr><th>Nombre</th><th style="width:120px">Acciones</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>`;
+    tr2.appendChild(td); tb.appendChild(tr2);
+
+    // handlers de la fila
+    const btnVer = tr.querySelector('.verTipos');
+    const btnEdit= tr.querySelector('.p-edit');
+    btnVer.onclick = ()=>{ tr2.style.display = tr2.style.display==='none' ? 'table-row' : 'none'; if(tr2.style.display!=='none') state.selectedProductId=p.id; };
+    btnEdit.onclick= ()=>{ p_fillForm(p); state.selectedProductId=p.id; p_showForm(true); };
+
+    // render tipos
+    const tbT = tr2.querySelector('.pt-table tbody');
+    tbT.innerHTML = '';
+    tipos.forEach(t=>{
+      const trT=document.createElement('tr');
+      trT.innerHTML = `<td>${t.name}</td><td><button class="btn gray pt-edit">Editar</button></td>`;
+      tbT.appendChild(trT);
+
+      const btnTE = trT.querySelector('.pt-edit');
+      btnTE.onclick = ()=>{
+        const frm=tr2.querySelector('.pt-form'); frm.style.display='flex';
+        frm.querySelector('.pt-id').value   = t.id;
+        frm.querySelector('.pt-name').value = t.name;
+        state.selectedProductId=p.id;
+      };
+    });
+
+    // crear nuevo tipo
+    const btnNewType = tr2.querySelector('.pt-new');
+    const frm = tr2.querySelector('.pt-form');
+    const fId = frm.querySelector('.pt-id');
+    const fNm = frm.querySelector('.pt-name');
+    const fSave = frm.querySelector('.pt-save');
+    const fCancel = frm.querySelector('.pt-cancel');
+
+    btnNewType.onclick = ()=>{ frm.style.display='flex'; fId.value=''; fNm.value=''; state.selectedProductId=p.id; };
+    fCancel.onclick = ()=>{ frm.style.display='none'; };
+
+    fSave.onclick = async ()=>{
+      const id = fId.value.trim();
+      const name = fNm.value.trim();
+      const product_id = p.id;
+      if(!name) return alert('Nombre del tipo requerido');
+      if(!id) await api('/api/product_types',{method:'POST', body:JSON.stringify({product_id,name})});
+      else    await api('/api/product_types',{method:'PUT',  body:JSON.stringify({id,name,product_id})});
+      frm.style.display='none';
+      await loadAll(p.id); // recargar manteniendo seleccionado
+      // abrir expand de nuevo
+      const rows = $('#tblProductsGrid tbody').rows;
+      // (la reconstrucción ya dejará la UI limpia; si quisieras reabrir, se puede buscar fila por nombre)
+    };
+  });
 }
-};
+
+// ==========================================================
+//         Campañas / Reservas (lista simple demo)
+// ==========================================================
+function fillTable(id, rows, cols){
+  const tb=document.querySelector(`#${id} tbody`); tb.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    cols.forEach(c=>{ const td=document.createElement('td'); td.textContent=r[c]??''; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+}
+
+// API público (usuarios)
+export const dash = { u_edit(u){ u_fillForm(u); u_showForm(true); } };
 window.dash = dash;
 
 // ==========================================================
-//                   CARGA INICIAL GLOBAL
+//                   CARGA INICIAL
 // ==========================================================
-async function loadAll(){
-  const [users, products, types, campaigns, campProds, reservations] = await Promise.all([
-    api('/api/users').catch(()=>[]),
-    api('/api/products').catch(()=>[]),
-    api('/api/product_types').catch(()=>[]),
-    api('/api/campaigns').catch(()=>[]),
-    api('/api/campaign_products').catch(()=>[]),
-    api('/api/reservations').catch(()=>[])
-  ]);
+async function loadAll(selectProductId){
+  try{
+    const [users,products,types,camps,res] = await Promise.all([
+      api('/api/users').catch(()=>[]),
+      api('/api/products').catch(()=>[]),
+      api('/api/product_types').catch(()=>[]),
+      api('/api/campaigns').catch(()=>[]),
+      api('/api/reservations').catch(()=>[]),
+    ]);
 
-  // Usuarios
-  renderUsers(users);
+    renderUsers(users);
+    state.products=products||[];
+    state.types=types||[];
+    renderProductsGrid();
 
-  // Productos & Tipos
-  state.products = products || [];
-  state.types    = types || [];
-  renderProductsOnly(state.products);
-  renderTypesFor(state.selectedProductId);
+    fillTable('tblCampaigns', camps, ['id','name']);
+    fillTable('tblReservations', res,   ['id','client_name','phone']);
 
-  // Campañas / Reservas (tablas básicas)
-  fillTable('tblCampaigns', campaigns, ['id','name','start_date','end_date']);
-  fillTable('tblCampaignProducts', campProds, ['id','campaign_id','product_id']);
-  fillTable('tblReservations', reservations, ['id','client_name','phone','status','created_at']);
-
-  // selects
-  fillSelect('cp_campaign', campaigns);
-  fillSelect('cp_product', state.products);
-  fillSelect('r_type', state.types, 'id', 'name');
+    if(selectProductId){
+      // opcional: mantener expandido el producto editado/creado
+      const idx = state.products.findIndex(p=>p.id===selectProductId);
+      if(idx>-1){
+        const body = $('#tblProductsGrid tbody');
+        const mainRow  = body.rows[idx*2];   // cada producto ocupa 2 filas (principal + expand)
+        const expandRow= body.rows[idx*2+1];
+        if(mainRow && expandRow){ expandRow.style.display='table-row'; }
+      }
+    }
+  }catch(e){ console.error(e); }
 }
-loadAll().catch(console.error);
+loadAll();
