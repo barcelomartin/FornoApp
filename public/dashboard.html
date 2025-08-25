@@ -1,103 +1,78 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Forno · Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fafafa;color:#1b1b1b}
-    header{padding:12px 18px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
-    main{display:grid;grid-template-columns:240px 1fr;gap:16px;margin:16px}
-    nav{background:#fff;border:1px solid #ececec;border-radius:10px;padding:10px}
-    nav h3{margin:10px 8px;color:#777;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
-    nav a{display:block;padding:8px 10px;margin:2px 0;border-radius:8px;color:#333;text-decoration:none}
-    nav a.active{background:#17a05d;color:#fff}
-    section.panel{background:#fff;border:1px solid #ececec;border-radius:10px;padding:16px;display:none}
-    section.panel.active{display:block}
-    h2{margin:0 0 12px}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}
-    th,td{padding:10px 12px;border-bottom:1px solid #ececec;text-align:left}
-    thead th{background:#f7f7f7;font-weight:600}
-    .btn{background:#17a05d;color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .role-badge{padding:2px 8px;background:#f0f0f0;border-radius:999px;font-size:12px}
-    .user-cell{display:flex;align-items:center;gap:6px}
-    .avatar{width:18px;height:18px}
-    .avatar.admin{color:#2b6ad1}
-    .avatar.user{color:#000}
-    .expand-row td{background:#fcfcfc}
-    .expand-box{padding:10px;border:1px dashed #e7e7e7;border-radius:8px}
-    .pill{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:#e7f6ee;color:#126b43;font-weight:600;font-size:12px}
-    .muted{color:#777;font-size:13px}
-  </style>
-</head>
-<body>
-  <header>
-    <div><h1 style="margin:0;font-size:20px">Forno · Dashboard</h1></div>
-    <div>
-      <span id="who" class="muted"></span>
-      <button id="logoutBtn" class="btn" style="margin-left:10px">Salir</button>
-    </div>
-  </header>
-
-  <main>
-    <nav>
-      <h3>Inicio</h3>
-      <a href="#home" data-panel="home">Dashboard</a>
-
-      <h3>Menú Maestros</h3>
-      <a href="#usuarios" data-panel="usuarios">Usuarios</a>
-      <a href="#productos" data-panel="productos">Productos & Tipos</a>
-      <a href="#campanias" data-panel="campanias">Campañas</a>
-
-      <h3>Menú Reservas</h3>
-      <a href="#reservas" data-panel="reservas">Reservas</a>
-    </nav>
-
-    <!-- Usuarios -->
-    <section id="panel-usuarios" class="panel">
-      <h2>Usuarios <button id="u_newBtn" class="btn">+ Nuevo</button></h2>
-      <div id="u_formWrap" style="display:none;gap:8px;margin-bottom:10px">
-        <input id="u_id" type="hidden"/>
-        <input id="u_name" placeholder="Nombre" />
-        <input id="u_pass" placeholder="Contraseña" />
-        <select id="u_role">
-          <option value="1">Admin</option>
-          <option value="2">Usuario</option>
-        </select>
-        <button id="u_saveBtn" class="btn">Guardar</button>
-        <button id="u_cancelBtn" class="btn" style="background:#bbb">Cancelar</button>
-      </div>
-      <table id="tblUsers">
-        <thead><tr><th>Usuario</th><th>Role</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="muted" style="margin-top:8px">role: 1=admin, 2=usuario</p>
-    </section>
-
-    <!-- Productos & Tipos -->
-    <section id="panel-productos" class="panel">
-      <h2>Productos & Tipos</h2>
-      <table id="tblProductsGrid">
-        <thead><tr><th>Producto</th><th>Tipos</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
-    <!-- Campañas -->
-    <section id="panel-campanias" class="panel">
-      <h2>Campañas</h2>
-      <table id="tblCampaigns"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
-    </section>
-
-    <!-- Reservas -->
-    <section id="panel-reservas" class="panel">
-      <h2>Reservas</h2>
-      <table id="tblReservations"><thead><tr><th>id</th><th>cliente</th><th>tel</th></tr></thead><tbody></tbody></table>
-    </section>
-  </main>
-
-  <script src="/dashboard.js" type="module"></script>
-</body>
-</html>
+<!-- PRODUCTOS & TIPOS -->
+<section id="panel-productos" class="panel">
+<h2>Productos & Tipos</h2>
+    
+<div class="grid two">
+        <!-- Columna izquierda: Formularios -->
+<div>
+          <div class="row">
+            <div style="flex:1"><label>Producto<input id="p_name"></label></div>
+            <button class="btn" onclick="dash.addProduct()">Agregar</button>
+          <!-- Bloque Producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;">
+            <h3 style="margin:0 0 10px">Producto</h3>
+            <div id="p_form" class="row" style="display:none">
+              <input id="p_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Nombre del producto
+                  <input id="p_name" placeholder="Ej. Panettone"/>
+                </label>
+              </div>
+              <button class="btn" id="p_saveBtn" type="button">Guardar</button>
+              <button class="btn btn-red" id="p_cancelBtn" type="button">Cancelar</button>
+            </div>
+            <p id="p_hint" class="muted" style="margin:0">Selecciona “Editar” en el grid o “+ Nuevo producto”.</p>
+</div>
+          <hr/>
+          <div class="row">
+            <div style="flex:1"><label>Producto<select id="pt_product"></select></label></div>
+            <div style="flex:1"><label>Tipo<input id="pt_name"></label></div>
+            <button class="btn" onclick="dash.addProductType()">Agregar tipo</button>
+    
+          <!-- Bloque Tipos del producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;">
+            <h3 style="margin:0 0 10px">Tipos del producto</h3>
+            <p id="pt_title" class="muted" style="margin:0 0 8px">Selecciona un producto para gestionar sus tipos.</p>
+    
+            <div id="pt_form" class="row" style="display:none">
+              <input id="pt_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Tipo
+                  <input id="pt_name" placeholder="Ej. al pistacchio"/>
+                </label>
+              </div>
+              <button class="btn" id="pt_saveBtn" type="button">Guardar</button>
+              <button class="btn btn-red" id="pt_cancelBtn" type="button">Cancelar</button>
+            </div>
+    
+            <div class="row" style="margin:8px 0 10px">
+              <button class="btn" id="pt_newBtn" type="button" disabled>+ Nuevo tipo</button>
+            </div>
+    
+            <table id="tblTypesFor">
+              <thead>
+                <tr><th>Tipo</th><th style="width:120px">acciones</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+</div>
+</div>
+    
+        <!-- Columna derecha: Grid SOLO de productos -->
+<div>
+          <table id="tblProducts"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
+          <br/>
+          <table id="tblTypes"><thead><tr><th>id</th><th>product</th><th>type</th></tr></thead><tbody></tbody></table>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h3 style="margin:0">Productos</h3>
+            <button class="btn" id="p_newBtn" type="button">+ Nuevo producto</button>
+          </div>
+          <table id="tblProductsOnly">
+            <thead>
+              <tr><th>Producto</th><th style="width:120px">acciones</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+</div>
+</div>
+</section>
