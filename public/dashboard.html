@@ -6,35 +6,35 @@
   <title>Forno · Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root{
+      --line:#ececec; --green:#17a05d; --red:#e23b3b;
+    }
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fafafa;color:#1b1b1b}
     header{padding:12px 18px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
     main{display:grid;grid-template-columns:240px 1fr;gap:16px;margin:16px}
-    nav{background:#fff;border:1px solid #ececec;border-radius:10px;padding:10px}
+    nav{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
     nav h3{margin:10px 8px;color:#777;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
     nav a{display:block;padding:8px 10px;margin:2px 0;border-radius:8px;color:#333;text-decoration:none}
     nav a.active{background:#17a05d;color:#fff}
-    section.panel{background:#fff;border:1px solid #ececec;border-radius:10px;padding:16px;display:none}
+    section.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;display:none}
     section.panel.active{display:block}
     h2{margin:0 0 12px;display:flex;align-items:center;gap:10px}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}
-    th,td{padding:10px 12px;border-bottom:1px solid #ececec;text-align:left}
-    thead th{background:#f7f7f7;font-weight:600}
+    .title-actions{margin-left:auto;display:flex;gap:8px}
     .btn{background:#17a05d;color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
-    .btn.secondary{background:#0f8c4f}
     .btn.gray{background:#9aa0a6}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .grid{display:grid;gap:14px}
+    .two{grid-template-columns:1fr 1fr}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .row input, .row select{padding:8px 10px;border:1px solid #e5e5e5;border-radius:8px}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    thead th{background:#f7f7f7}
+    .muted{color:#777;font-size:13px}
     .role-badge{padding:2px 8px;background:#f0f0f0;border-radius:999px;font-size:12px}
     .user-cell{display:flex;align-items:center;gap:6px}
     .avatar{width:18px;height:18px}
     .avatar.admin{color:#2b6ad1}
     .avatar.user{color:#000}
-    .expand-row td{background:#fcfcfc}
-    .expand-box{padding:12px;border:1px dashed #e7e7e7;border-radius:8px}
-    .pill{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:#e7f6ee;color:#126b43;font-weight:600;font-size:12px}
-    .muted{color:#777;font-size:13px}
-    .form-inline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-    .form-inline input{padding:8px 10px;border:1px solid #e5e5e5;border-radius:8px}
-    .title-actions{margin-left:auto;display:flex;gap:8px}
   </style>
 </head>
 <body>
@@ -60,13 +60,19 @@
       <a href="#reservas" data-panel="reservas">Reservas</a>
     </nav>
 
-    <!-- Usuarios -->
+    <!-- DASHBOARD (placeholder) -->
+    <section id="panel-home" class="panel">
+      <h2>Dashboard</h2>
+      <p class="muted">Pantalla de inicio — aquí pondremos tarjetas/gráficos más adelante.</p>
+    </section>
+
+    <!-- USUARIOS -->
     <section id="panel-usuarios" class="panel">
       <h2>Usuarios <span class="title-actions"><button id="u_newBtn" class="btn">+ Nuevo</button></span></h2>
-      <div id="u_formWrap" class="form-inline" style="display:none">
+      <div id="u_formWrap" class="row" style="display:none">
         <input id="u_id" type="hidden"/>
-        <input id="u_name" placeholder="Nombre" />
-        <input id="u_pass" placeholder="Contraseña" />
+        <input id="u_name" placeholder="Nombre"/>
+        <input id="u_pass" placeholder="Contraseña"/>
         <select id="u_role">
           <option value="1">Admin</option>
           <option value="2">Usuario</option>
@@ -81,37 +87,112 @@
       <p class="muted" style="margin-top:8px">role: 1=admin, 2=usuario</p>
     </section>
 
-    <!-- Productos & Tipos -->
+    <!-- PRODUCTOS & TIPOS -->
     <section id="panel-productos" class="panel">
       <h2>
         Productos & Tipos
         <span class="title-actions"><button id="p_newBtn" class="btn">+ Nuevo producto</button></span>
       </h2>
 
-      <!-- Form producto -->
-      <div id="p_form" class="form-inline" style="display:none">
-        <input id="p_id" type="hidden"/>
-        <input id="p_name" placeholder="Nombre del producto" />
-        <button id="p_saveBtn" class="btn">Guardar</button>
-        <button id="p_cancelBtn" class="btn gray">Cancelar</button>
-      </div>
+      <div class="grid two">
+        <!-- Columna izquierda: formularios -->
+        <div>
+          <!-- Producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;">
+            <h3 style="margin:0 0 10px">Producto</h3>
+            <div id="p_form" class="row" style="display:none">
+              <input id="p_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Nombre del producto
+                  <input id="p_name" placeholder="Ej. Panettone"/>
+                </label>
+              </div>
+              <button class="btn" id="p_saveBtn" type="button">Guardar</button>
+              <button class="btn gray" id="p_cancelBtn" type="button">Cancelar</button>
+            </div>
+            <p id="p_hint" class="muted" style="margin:0">Selecciona “Editar” en el grid o “+ Nuevo producto”.</p>
+          </div>
 
-      <table id="tblProductsGrid">
-        <thead><tr><th>Producto</th><th>Tipos</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
+          <!-- Tipos del producto -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;">
+            <h3 style="margin:0 0 10px">Tipos del producto</h3>
+            <p id="pt_title" class="muted" style="margin:0 0 8px">Selecciona un producto para gestionar sus tipos.</p>
+
+            <div id="pt_form" class="row" style="display:none">
+              <input id="pt_id" type="hidden"/>
+              <div style="flex:1">
+                <label>Tipo
+                  <input id="pt_name" placeholder="Ej. al pistacchio"/>
+                </label>
+              </div>
+              <button class="btn" id="pt_saveBtn" type="button">Guardar</button>
+              <button class="btn gray" id="pt_cancelBtn" type="button">Cancelar</button>
+            </div>
+
+            <div class="row" style="margin:8px 0 10px">
+              <button class="btn" id="pt_newBtn" type="button" disabled>+ Nuevo tipo</button>
+            </div>
+
+            <table id="tblTypesFor">
+              <thead>
+                <tr><th>Tipo</th><th style="width:120px">Acciones</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Columna derecha: grid solo de productos -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h3 style="margin:0">Productos</h3>
+          </div>
+          <table id="tblProductsOnly">
+            <thead>
+              <tr><th>Producto</th><th style="width:120px">Acciones</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+          <!-- Tablas de apoyo que ya usabas -->
+          <br/>
+          <table id="tblProducts"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
+          <br/>
+          <table id="tblTypes"><thead><tr><th>id</th><th>product</th><th>type</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
     </section>
 
-    <!-- Campañas -->
+    <!-- CAMPAÑAS -->
     <section id="panel-campanias" class="panel">
       <h2>Campañas</h2>
-      <table id="tblCampaigns"><thead><tr><th>id</th><th>name</th></tr></thead><tbody></tbody></table>
+      <div class="row" style="margin-bottom:8px">
+        <input id="c_name" placeholder="Nombre"/>
+        <input id="c_start" type="date"/>
+        <input id="c_end" type="date"/>
+        <button class="btn" onclick="dash.addCampaign()">Crear</button>
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <select id="cp_campaign"></select>
+        <select id="cp_product"></select>
+        <button class="btn" onclick="dash.addCampaignProduct()">Asignar producto</button>
+      </div>
+      <table id="tblCampaigns"><thead><tr><th>id</th><th>name</th><th>start_date</th><th>end_date</th></tr></thead><tbody></tbody></table>
+      <br/>
+      <table id="tblCampaignProducts"><thead><tr><th>id</th><th>campaign_id</th><th>product_id</th></tr></thead><tbody></tbody></table>
     </section>
 
-    <!-- Reservas -->
+    <!-- RESERVAS -->
     <section id="panel-reservas" class="panel">
       <h2>Reservas</h2>
-      <table id="tblReservations"><thead><tr><th>id</th><th>cliente</th><th>tel</th></tr></thead><tbody></tbody></table>
+      <div class="row" style="margin-bottom:8px">
+        <input id="r_client" placeholder="Cliente"/>
+        <input id="r_phone" placeholder="Teléfono"/>
+        <select id="r_type"></select>
+        <input id="r_qty" type="number" min="1" value="1" style="width:90px"/>
+        <button class="btn" onclick="dash.createReservation()">Crear</button>
+      </div>
+      <table id="tblReservations"><thead><tr><th>id</th><th>client_name</th><th>phone</th><th>status</th><th>created_at</th></tr></thead><tbody></tbody></table>
     </section>
   </main>
 
