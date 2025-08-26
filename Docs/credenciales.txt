@@ -20,3 +20,9 @@ https://forno-app.vercel.app/login.html
 
 // GitHub
 url. https://github.com/barcelomartin/FornoApp
+
+
+GIT Commands
+
+git push -u origin master
+
