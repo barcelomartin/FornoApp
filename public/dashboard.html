@@ -1,88 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Forno · Dashboard</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-  <style>
-    :root {
-      --white: #ffffff;
-      --bg: #fafafa;
-      --panel: #ffffff;
-      --text: #1b1b1b;
-      --muted: #7a7a7a;
-      --green: #17a05d;
-      --red: #e23b3b;
-      --line: #ececec;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); }
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: var(--white); padding: 10px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    header h1 { font-size: 20px; margin: 0; }
-    main { display: flex; }
-    nav {
-      width: 260px; background: var(--panel); padding: 20px;
-      border-right: 1px solid var(--line); min-height: calc(100vh - 50px);
-    }
-    .menu a {
-      display: block; padding: 10px; margin-bottom: 5px;
-      text-decoration: none; color: var(--text); border-radius: 8px;
-    }
-    .menu a.active, .menu a:hover {
-      background: var(--green); color: white;
-    }
-    section.panel { flex: 1; padding: 24px; display: none; }
-    section.panel.active { display: block; }
-    .btn { background: var(--green); color: white; padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; }
-    .btn-red { background: var(--red); }
-    .muted { color: var(--muted); font-size: 14px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border: 1px solid var(--line); }
-    th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: left; }
-    .user-icon { font-size: 16px; margin-right: 6px; }
-    .user-icon.admin { color: #007bff; }
-    .user-icon.user { color: #111; }
-    .status-icon { font-size: 16px; }
-    .status-icon.active { color: #38a169; }
-    .status-icon.inactive { color: #e53e3e; }
-  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Forno · Dashboard</h1>
-    <div><span id="who" class="muted"></span> <button id="logoutBtn" class="btn">Salir</button></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 18px;">
+      <div class="brand" style="display:flex; align-items:center; gap:12px;">
+        <img src="/logo.png" alt="logo" style="width:34px; height:34px; border-radius:50%">
+        <h1 style="font-size:18px; margin:0;">Forno · Dashboard</h1>
+      </div>
+      <div class="actions" style="display:flex; gap:14px; align-items:center;">
+        <span id="who" class="muted"></span>
+        <button id="logoutBtn" class="btn btn-red">Salir</button>
+      </div>
+    </div>
+    <!-- Línea tricolor -->
+    <div style="display: flex; height: 4px;">
+      <div style="flex: 1; background: #2ecc71;"></div> <!-- verde -->
+      <div style="flex: 1; background: #ffffff;"></div> <!-- blanco -->
+      <div style="flex: 1; background: #e74c3c;"></div> <!-- rojo -->
+    </div>
   </header>
-  <main>
-    <nav>
+
+  <main style="display:grid; grid-template-columns:240px 1fr; gap:20px; padding:20px;">
+    <nav style="border-right:1px solid #eee; padding-right:16px;">
       <div class="menu">
         <a href="#home" data-panel="home">Dashboard</a>
+
+        <div style="margin-top: 20px; font-weight: bold; color: #888;">Menú Maestros</div>
         <a href="#usuarios" data-panel="usuarios">Usuarios</a>
         <a href="#productos" data-panel="productos">Productos & Tipos</a>
+        <a href="#campanias" data-panel="campanias">Campañas & Asignaciones</a>
+
+        <div style="margin-top: 20px; font-weight: bold; color: #888;">Menú Reservas</div>
+        <a href="#reservas" data-panel="reservas">Reservas</a>
       </div>
     </nav>
-    <section id="panel-home" class="panel active">
+
+    <section class="panel" id="panel-home">
       <h2>Dashboard</h2>
-      <p>Aquí mostraremos tus métricas y gráficos. Próximamente 😅</p>
+      <p>Bienvenido al sistema de gestión de Forno. Selecciona una opción del menú.</p>
     </section>
-    <section id="panel-usuarios" class="panel">
+
+    <section class="panel" id="panel-usuarios">
       <h2>Usuarios</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <button class="btn" id="u_newBtn">+ Nuevo</button>
+      </div>
+
+      <!-- Formulario inline -->
+      <form id="u_form" class="grid two" style="display:none; margin-bottom:16px;">
+        <input id="u_id" type="hidden">
+        <div>
+          <label>Nombre:<input id="u_name" required></label>
+        </div>
+        <div>
+          <label>Contraseña:<input id="u_pass" type="password" placeholder="(dejar vacío para no cambiar)"></label>
+        </div>
+        <div>
+          <label>Rol:
+            <select id="u_role">
+              <option value="1">Administrador</option>
+              <option value="2">Usuario</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>Activo:
+            <input id="u_active" type="checkbox">
+          </label>
+        </div>
+        <div style="grid-column:1/-1; text-align:right; margin-top:10px;">
+          <button type="submit" class="btn">Guardar</button>
+          <button type="button" class="btn btn-red" id="u_cancelBtn">Cancelar</button>
+        </div>
+      </form>
+
       <table id="tblUsers">
-        <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th style="width:100px">Acciones</th>
+          </tr>
+        </thead>
         <tbody></tbody>
       </table>
     </section>
-    <section id="panel-productos" class="panel">
+
+    <section class="panel" id="panel-productos" style="display:none;">
       <h2>Productos & Tipos</h2>
-      <table id="tblProducts">
-        <thead><tr><th>Producto</th><th>Tipos</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <p>En desarrollo.</p>
+    </section>
+
+    <section class="panel" id="panel-campanias" style="display:none;">
+      <h2>Campañas & Asignaciones</h2>
+      <p>En desarrollo.</p>
+    </section>
+
+    <section class="panel" id="panel-reservas" style="display:none;">
+      <h2>Reservas</h2>
+      <p>En desarrollo.</p>
     </section>
   </main>
-  <script src="dashboard.js" type="module"></script>
+
+  <script src="/dashboard.js" type="module"></script>
 </body>
 </html>
