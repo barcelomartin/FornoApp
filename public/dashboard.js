@@ -1,136 +1,94 @@
-// --- guard: requiere login
-const me = JSON.parse(localStorage.getItem('forno_user') || 'null');
-if (!me) location.href = '/login.html';
+document.addEventListener("DOMContentLoaded", () => {
+  showPanel("dashboard");
+  cargarUsuarios();
+  document.getElementById("formUsuario").addEventListener("submit", guardarUsuario);
+});
 
-// ui header
-const who = document.getElementById('who');
-if (who) who.textContent = `Usuario: ${me?.name}`;
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) logoutBtn.onclick = () => { localStorage.removeItem('forno_user'); location.href='/login.html'; };
-
-// router simple por hash
-const links = [...document.querySelectorAll('a[data-panel]')];
-const panels = {
-  home:      document.getElementById('panel-home'),
-  usuarios:  document.getElementById('panel-usuarios'),
-  productos: document.getElementById('panel-productos'),
-  campanias: document.getElementById('panel-campanias'),
-  reservas:  document.getElementById('panel-reservas'),
-};
-function show(panel) {
-  Object.values(panels).forEach(p=>p && p.classList.remove('active'));
-  links.forEach(a=>a.classList.remove('active'));
-  if (panels[panel]) {
-    panels[panel].classList.add('active');
-    const link = links.find(a=>a.dataset.panel===panel);
-    if (panel !== 'home' && link) link.classList.add('active');
-  } else {
-    panels.home?.classList.add('active');
-  }
+function showPanel(id) {
+  document.querySelectorAll(".panel").forEach(panel => panel.style.display = "none");
+  document.getElementById(id).style.display = "block";
 }
-window.addEventListener('hashchange', ()=>show(location.hash.slice(1)));
-show(location.hash.slice(1) || 'home');
 
-// ----------------- Helpers -----------------
-async function api(path, opts){
-  const r = await fetch(path, { headers:{'Content-Type':'application/json'}, ...opts });
-  const data = await r.json().catch(()=> ({}));
-  if (!r.ok) throw new Error(data?.error || 'Error');
-  return data;
+function logout() {
+  window.location.href = "login.html";
 }
-const $ = sel => document.querySelector(sel);
 
-// -------- Usuarios: render especial (avatar pequeño + role bonito, SIN id) ----------
-function renderUsers(users){
-  const tb = document.querySelector('#tblUsers tbody');
-  if (!tb) return;
-  tb.innerHTML = '';
+let usuarios = [
+  { id: 1, nombre: "admin", rol: "admin", activo: true },
+  { id: 2, nombre: "leo", rol: "user", activo: false }
+];
 
-  users.forEach(u=>{
-    const role = Number(u.role);
-    const roleName  = role === 1 ? 'Administrador' : 'Operador';
-    const roleClass = role === 1 ? 'admin' : 'user';
+function cargarUsuarios() {
+  const tabla = document.getElementById("tablaUsuarios");
+  tabla.innerHTML = "";
 
-    const tr = document.createElement('tr');
+  usuarios.forEach(usuario => {
+    const fila = document.createElement("tr");
 
-    const tdUser = document.createElement('td');
-    tdUser.innerHTML = `
-      <div class="user-cell">
-        <svg class="avatar ${roleClass}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/>
-        </svg>
-        <span class="name">${u.name}</span>
-      </div>`;
-    tr.appendChild(tdUser);
+    const icono = document.createElement("td");
+    const iconoHTML = usuario.rol === "admin"
+      ? '<i class="fas fa-user user-icon admin"></i>'
+      : '<i class="fas fa-user user-icon user"></i>';
+    icono.innerHTML = `${iconoHTML} ${usuario.nombre}`;
 
-    const tdRole = document.createElement('td');
-    tdRole.innerHTML = `<span class="role-badge">${roleName}</span>`;
-    tr.appendChild(tdRole);
+    const rol = document.createElement("td");
+    rol.textContent = usuario.rol === "admin" ? "Administrador" : "Operador";
 
-    const tdAct = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Editar';
-    btn.onclick = () => dash.u_edit(u);
-    tdAct.appendChild(btn);
-    tr.appendChild(tdAct);
+    const estado = document.createElement("td");
+    estado.innerHTML = usuario.activo
+      ? '<i class="fas fa-check" style="color: green"></i>'
+      : '<i class="fas fa-times" style="color: red"></i>';
 
-    tb.appendChild(tr);
+    const acciones = document.createElement("td");
+    const btnEditar = document.createElement("button");
+    btnEditar.textContent = "Editar";
+    btnEditar.className = "btn";
+    btnEditar.onclick = () => mostrarFormularioUsuario(usuario);
+    acciones.appendChild(btnEditar);
+
+    fila.appendChild(icono);
+    fila.appendChild(rol);
+    fila.appendChild(estado);
+    fila.appendChild(acciones);
+    tabla.appendChild(fila);
   });
 }
 
-// -------- Carga inicial global --------
-async function loadAll(){
-  const [users] = await Promise.all([
-    api('/api/users').catch(()=>[])
-  ]);
-  renderUsers(users);
-}
-loadAll().catch(console.error);
-
-// -------- Usuarios: Nuevo / Editar ----------
-const uWrap = $('#u_formWrap');
-const uNewBtn = $('#u_newBtn');
-const uSaveBtn = $('#u_saveBtn');
-const uCancelBtn = $('#u_cancelBtn');
-
-function u_showForm(show){ if (uWrap) uWrap.style.display = show ? 'grid' : 'none'; }
-function u_fillForm(user) {
-  $('#u_id').value   = user?.id ?? '';
-  $('#u_name').value = user?.name ?? '';
-  $('#u_pass').value = '';
-  $('#u_role').value = user?.role ?? '2';
+function mostrarFormularioUsuario(usuario = null) {
+  document.getElementById("modalTitulo").textContent = usuario ? "Editar Usuario" : "Nuevo Usuario";
+  document.getElementById("username").value = usuario ? usuario.nombre : "";
+  document.getElementById("rol").value = usuario ? usuario.rol : "user";
+  document.getElementById("active").checked = usuario ? usuario.activo : true;
+  document.getElementById("formUsuario").dataset.editando = usuario ? usuario.id : "";
+  document.getElementById("modalUsuario").style.display = "block";
 }
 
-uNewBtn?.addEventListener('click', () => { u_fillForm(null); u_showForm(true); });
-uCancelBtn?.addEventListener('click', () => { u_showForm(false); });
+function cerrarModal() {
+  document.getElementById("modalUsuario").style.display = "none";
+  document.getElementById("formUsuario").reset();
+}
 
-uSaveBtn?.addEventListener('click', async () => {
-  const id   = $('#u_id')?.value?.trim() || '';
-  const name = $('#u_name')?.value?.trim() || '';
-  const pass = $('#u_pass')?.value || '';
-  const role = parseInt($('#u_role')?.value || '2', 10);
-  if (!name) return alert('Nombre requerido');
+function guardarUsuario(e) {
+  e.preventDefault();
+  const id = document.getElementById("formUsuario").dataset.editando;
+  const nombre = document.getElementById("username").value.trim();
+  const rol = document.getElementById("rol").value;
+  const activo = document.getElementById("active").checked;
 
-  if (!id) {
-    await api('/api/users', {
-      method:'POST',
-      body: JSON.stringify({ name, password: pass || '1234', role })
-    });
+  if (!nombre) return;
+
+  if (id) {
+    const usuario = usuarios.find(u => u.id == id);
+    if (usuario) {
+      usuario.nombre = nombre;
+      usuario.rol = rol;
+      usuario.activo = activo;
+    }
   } else {
-    const payload = { id, name, role };
-    if (pass) payload.password = pass;
-    await api('/api/users', {
-      method:'PUT',
-      body: JSON.stringify(payload)
-    });
+    const nuevoId = Math.max(...usuarios.map(u => u.id)) + 1;
+    usuarios.push({ id: nuevoId, nombre, rol, activo });
   }
 
-  u_showForm(false);
-  await loadAll();
-});
-
-// Exponer funciones globales
-export const dash = {
-  u_edit(user){ u_fillForm(user); u_showForm(true); }
-};
+  cerrarModal();
+  cargarUsuarios();
+}

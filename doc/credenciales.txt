@@ -1,0 +1,35 @@
+-- Base de Datos --
+
+url . https://neon.tech
+user. barcelomartin@gmail.com
+
+
+- connection string
+
+psql 'postgresql://neondb_owner:npg_gY1oEycpjsI8@ep-raspy-waterfall-ab70nxuo-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+
+- passwordless auth
+
+psql -h pg.neon.tech
+
+
+https://vercel.com/new?teamSlug=martins-projects-d1a3c0b6
+
+// Acceder a la app
+https://forno-app.vercel.app/login.html
+
+// GitHub
+url. https://github.com/barcelomartin/FornoApp
+
+
+GIT Commands
+
+git push -u origin master
+
+-- desplegar --
+git add .
+git commit -m "Dashboard y JS actualizados"
+git push origin Salamandra
+
+
+

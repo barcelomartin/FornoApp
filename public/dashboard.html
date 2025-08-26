@@ -1,117 +1,104 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Forno · Dashboard</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="dashboard.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
   <header>
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 18px;">
-      <div class="brand" style="display:flex; align-items:center; gap:12px;">
-        <img src="/logo.png" alt="logo" style="width:34px; height:34px; border-radius:50%">
-        <h1 style="font-size:18px; margin:0;">Forno · Dashboard</h1>
-      </div>
-      <div class="actions" style="display:flex; gap:14px; align-items:center;">
-        <span id="who" class="muted"></span>
-        <button id="logoutBtn" class="btn btn-red">Salir</button>
-      </div>
+    <div class="logo">
+      <img src="logo.png" alt="Forno Logo" />
+      <h1>Forno · Dashboard</h1>
     </div>
-    <!-- Línea tricolor -->
-    <div style="display: flex; height: 4px;">
-      <div style="flex: 1; background: #2ecc71;"></div> <!-- verde -->
-      <div style="flex: 1; background: #ffffff;"></div> <!-- blanco -->
-      <div style="flex: 1; background: #e74c3c;"></div> <!-- rojo -->
+    <div>
+      <span id="userInfo">Usuario: admin</span>
+      <button onclick="logout()" class="btn logout">Salir</button>
     </div>
   </header>
 
-  <main style="display:grid; grid-template-columns:240px 1fr; gap:20px; padding:20px;">
-    <nav style="border-right:1px solid #eee; padding-right:16px;">
-      <div class="menu">
-        <a href="#home" data-panel="home">Dashboard</a>
+  <div class="top-border">
+    <div class="line green"></div>
+    <div class="line red"></div>
+  </div>
 
-        <div style="margin-top: 20px; font-weight: bold; color: #888;">Menú Maestros</div>
-        <a href="#usuarios" data-panel="usuarios">Usuarios</a>
-        <a href="#productos" data-panel="productos">Productos & Tipos</a>
-        <a href="#campanias" data-panel="campanias">Campañas & Asignaciones</a>
+  <main>
+    <nav>
+      <p class="menu-title">Inicio</p>
+      <a href="#" onclick="showPanel('dashboard')">Dashboard</a>
 
-        <div style="margin-top: 20px; font-weight: bold; color: #888;">Menú Reservas</div>
-        <a href="#reservas" data-panel="reservas">Reservas</a>
-      </div>
+      <p class="menu-title">Menú Maestros</p>
+      <a href="#" onclick="showPanel('usuarios')">Usuarios</a>
+      <a href="#" onclick="showPanel('productos')">Productos & Tipos</a>
+      <a href="#" onclick="showPanel('campanias')">Campañas & Asignaciones</a>
+
+      <p class="menu-title">Menú Reservas</p>
+      <a href="#" onclick="showPanel('reservas')">Reservas</a>
     </nav>
 
-    <section class="panel" id="panel-home">
+    <section class="panel" id="dashboard" style="display: block">
       <h2>Dashboard</h2>
       <p>Bienvenido al sistema de gestión de Forno. Selecciona una opción del menú.</p>
     </section>
 
-    <section class="panel" id="panel-usuarios">
+    <section class="panel" id="usuarios">
       <h2>Usuarios</h2>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <button class="btn" id="u_newBtn">+ Nuevo</button>
-      </div>
-
-      <!-- Formulario inline -->
-      <form id="u_form" class="grid two" style="display:none; margin-bottom:16px;">
-        <input id="u_id" type="hidden">
-        <div>
-          <label>Nombre:<input id="u_name" required></label>
-        </div>
-        <div>
-          <label>Contraseña:<input id="u_pass" type="password" placeholder="(dejar vacío para no cambiar)"></label>
-        </div>
-        <div>
-          <label>Rol:
-            <select id="u_role">
-              <option value="1">Administrador</option>
-              <option value="2">Usuario</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <label>Activo:
-            <input id="u_active" type="checkbox">
-          </label>
-        </div>
-        <div style="grid-column:1/-1; text-align:right; margin-top:10px;">
-          <button type="submit" class="btn">Guardar</button>
-          <button type="button" class="btn btn-red" id="u_cancelBtn">Cancelar</button>
-        </div>
-      </form>
-
-      <table id="tblUsers">
+      <button class="btn" onclick="mostrarFormularioUsuario()">+ Nuevo</button>
+      <table>
         <thead>
           <tr>
-            <th></th>
             <th>Usuario</th>
             <th>Rol</th>
             <th>Estado</th>
-            <th style="width:100px">Acciones</th>
+            <th>Acciones</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="tablaUsuarios"></tbody>
       </table>
     </section>
 
-    <section class="panel" id="panel-productos" style="display:none;">
+    <section class="panel" id="productos" style="display: none">
       <h2>Productos & Tipos</h2>
-      <p>En desarrollo.</p>
+      <p>[Contenido de productos aquí]</p>
     </section>
 
-    <section class="panel" id="panel-campanias" style="display:none;">
+    <section class="panel" id="campanias" style="display: none">
       <h2>Campañas & Asignaciones</h2>
-      <p>En desarrollo.</p>
+      <p>[Contenido de campañas aquí]</p>
     </section>
 
-    <section class="panel" id="panel-reservas" style="display:none;">
+    <section class="panel" id="reservas" style="display: none">
       <h2>Reservas</h2>
-      <p>En desarrollo.</p>
+      <p>[Contenido de reservas aquí]</p>
     </section>
   </main>
 
-  <script src="/dashboard.js" type="module"></script>
+  <!-- Modal de edición -->
+  <div class="modal" id="modalUsuario">
+    <div class="modal-content">
+      <h3 id="modalTitulo">Editar Usuario</h3>
+      <form id="formUsuario">
+        <label for="username">Nombre de usuario:</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="rol">Rol:</label>
+        <select id="rol" name="rol">
+          <option value="admin">Administrador</option>
+          <option value="user">Operador</option>
+        </select>
+
+        <label for="active">Activo:</label>
+        <input type="checkbox" id="active" name="active" />
+
+        <div class="modal-actions">
+          <button type="submit" class="btn">Guardar</button>
+          <button type="button" class="btn btn-red" onclick="cerrarModal()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </body>
 </html>

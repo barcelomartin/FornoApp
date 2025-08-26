@@ -1,0 +1,156 @@
+:root {
+  --white: #ffffff;
+  --bg: #fafafa;
+  --panel: #ffffff;
+  --text: #1b1b1b;
+  --muted: #7a7a7a;
+  --green: #17a65d;
+  --red: #e23b3b;
+  --line: #ececec;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+  padding: 10px 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+main {
+  display: flex;
+}
+
+nav {
+  width: 260px;
+  background: var(--panel);
+  padding: 20px;
+  border-right: 1px solid var(--line);
+  min-height: calc(100vh - 50px);
+}
+
+.menu a {
+  display: block;
+  padding: 10px;
+  margin-bottom: 5px;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 8px;
+}
+
+.menu a.active, .menu a:hover {
+  background: var(--green);
+  color: white;
+}
+
+section.panel {
+  flex: 1;
+  padding: 24px;
+  display: none;
+}
+
+section.panel.active {
+  display: block;
+}
+
+.btn {
+  background: var(--green);
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-red {
+  background: var(--red);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border: 1px solid var(--line);
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.user-icon {
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.user-icon.admin {
+  color: #007bff;
+}
+
+.user-icon.user {
+  color: #111;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.status-icon.active {
+  color: #4CAF50;
+}
+
+.status-icon.inactive {
+  color: #F44336;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  max-width: 400px;
+}
+
+form label {
+  font-weight: bold;
+}
+
+form input, form select {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+form .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
