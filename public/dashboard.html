@@ -6,7 +6,7 @@
   <title>Forno · Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="dashboard.js" defer></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />  
 </head>
 <body>
   <header>
@@ -97,6 +97,32 @@
           <button type="submit" class="btn">Guardar</button>
           <button type="button" class="btn btn-red" onclick="cerrarModal()">Cancelar</button>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Usuario -->
+  <div id="userModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3 id="userModalTitle">Nuevo Usuario</h3>
+      <form id="userForm">
+        <label>Usuario:</label><br />
+        <input type="text" id="username" required /><br /><br />
+
+        <label>Rol:</label><br />
+        <select id="role">
+          <option value="Administrador">Administrador</option>
+          <option value="Operador">Operador</option>
+        </select><br /><br />
+
+        <label>Estado:</label><br />
+        <select id="active">
+          <option value="true">Activo</option>
+          <option value="false">Inactivo</option>
+        </select><br /><br />
+
+        <button type="submit" class="btn">Guardar</button>
+        <button type="button" class="btn btn-red" onclick="closeUserModal()">Cancelar</button>
       </form>
     </div>
   </div>

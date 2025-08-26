@@ -154,3 +154,8 @@ form .form-actions {
   gap: 10px;
   margin-top: 10px;
 }
+
+header img {
+  max-height: 100px;
+  width: auto;
+}

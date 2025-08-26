@@ -92,3 +92,38 @@ function guardarUsuario(e) {
   cerrarModal();
   cargarUsuarios();
 }
+
+function showUserModal(isEdit, user = {}) {
+  document.getElementById("userModalTitle").textContent = isEdit ? "Editar Usuario" : "Nuevo Usuario";
+  document.getElementById("username").value = user.username || "";
+  document.getElementById("role").value = user.role || "Usuario";
+  document.getElementById("active").value = user.active ? "true" : "false";
+  document.getElementById("userModal").style.display = "block";
+}
+
+function closeUserModal() {
+  document.getElementById("userModal").style.display = "none";
+}
+
+document.querySelector("#userForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const role = document.getElementById("role").value;
+  const active = document.getElementById("active").value === "true";
+
+  // Acá deberías enviar los datos a Supabase (crear o editar)
+  alert(`Guardado: ${username}, Rol: ${role}, Estado: ${active}`);
+
+  closeUserModal();
+  // Luego deberías recargar la tabla (por ahora se hace manual)
+});
+
+// Dentro de la función que renderiza los usuarios
+btnNuevo.addEventListener("click", () => {
+  showUserModal(false);
+});
+
+btnEditar.addEventListener("click", () => {
+  showUserModal(true, user); // user es cada usuario renderizado
+});
